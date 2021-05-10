@@ -22,21 +22,15 @@ class FileServerHandler extends Thread {
         try {
             FileContainer received = (FileContainer) in_stream.readObject();
 
-            System.out.println(received.getFiles());
+            for (var file : received.getFiles()) {
+                System.out.println(">> " + file.getFile_name() + " | " + file.getSizeFormat());
+            }
 
-            System.out.println("! OK");
+            file_server.close();
+
         } catch (ClassNotFoundException | IOException err) {
             err.printStackTrace();
             System.exit(1);
-        } finally {
-            try {
-                file_server.close();
-
-            } catch (IOException err) {
-                err.printStackTrace();
-                System.exit(1);
-            }
-
         }
     }
 }

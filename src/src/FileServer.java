@@ -50,18 +50,11 @@ public class FileServer {
             out_stream = new ObjectOutputStream(master_server.getOutputStream());
             FileContainer message = new FileContainer("rosie", 4567, files);
             out_stream.writeObject(message);
-
+            out_stream.close();
+            master_server.close();
         } catch (IOException err) {
             err.printStackTrace();
             System.exit(1);
-        } finally {
-            try {
-                out_stream.close();
-                master_server.close();
-            } catch (IOException err) {
-                System.exit(1);
-            }
-
         }
     }
 
