@@ -1,4 +1,6 @@
-public class FileInfo {
+import java.io.Serializable;
+
+public class FileInfo implements Serializable {
     private String path; // đường dẫn lưu file
     private String file_name; // tên file
     private long size; // kích thước file
