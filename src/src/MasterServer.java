@@ -3,15 +3,15 @@ import java.net.*;
 import java.util.*;
 
 class FileServerHandler extends Thread {
-    private Socket file_server;
+    private Socket secretary ; // nhận các `Package` từ `FileServer` và `lient`
     private ObjectInputStream in_stream;
     private PrintWriter out_stream;
 
     public FileServerHandler(Socket fs) {
-        file_server = fs;
+       secretary  = fs;
 
         try {
-            in_stream = new ObjectInputStream(file_server.getInputStream()); // đọc các object dc gửi từ phía file server
+            in_stream = new ObjectInputStream(secretary.getInputStream()); // đọc các object dc gửi từ phía file server
         } catch (IOException err) {
             err.printStackTrace();
             System.exit(1);
@@ -20,13 +20,17 @@ class FileServerHandler extends Thread {
 
     public void run() {
         try {
-            FileContainer received = (FileContainer) in_stream.readObject();
+            Package pkg = (Package) in_stream.readObject();
 
-            for (var file : received.getFiles()) {
-                System.out.println(">> " + file.getFile_name() + " | " + file.getSizeFormat());
+            if (pkg.getService().equals(FileServer.LABEL)) {
+                FileContainer content = (FileContainer) pkg.getContent();
+
+                for (var file : content.getFiles()) {
+                    System.out.println(">> " + file.getFile_name() + " | " + file.getSizeFormat());
+                }
             }
 
-            file_server.close();
+            secretary.close();
 
         } catch (ClassNotFoundException | IOException err) {
             err.printStackTrace();

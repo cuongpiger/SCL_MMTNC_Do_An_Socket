@@ -1,7 +1,6 @@
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.time.chrono.IsoChronology;
 import java.util.ArrayList;
 import java.io.*;
 
@@ -11,6 +10,7 @@ public class FileServer {
     private static InetAddress master_host;
     private static final int master_port = 1234;
     private static ObjectOutputStream out_stream;
+    public static final String LABEL = "FileServer";
 
     private void loadResources() {
         File resource_folder = new File(resources);
@@ -49,7 +49,8 @@ public class FileServer {
             master_server = new Socket(master_host, master_port);
             out_stream = new ObjectOutputStream(master_server.getOutputStream());
             FileContainer message = new FileContainer("rosie", 4567, files);
-            out_stream.writeObject(message);
+            Package pkg = new Package(LABEL, message);
+            out_stream.writeObject(pkg);
             out_stream.close();
             master_server.close();
         } catch (IOException err) {
