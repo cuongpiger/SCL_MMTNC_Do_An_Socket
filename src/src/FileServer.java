@@ -34,18 +34,14 @@ class FilesPanel extends JPanel {
 }
 
 class ColorsPanel extends JPanel {
+    private JTextArea display;
 
     public ColorsPanel() {
-//        display = new JTextArea(10, 15);
-//        display.setWrapStyleWord(true);
-//        display.setLineWrap(true);
-        Object[][] data = {};
-        String[] colHeads = {"Name", "Extension", "ID#"};
+        display = new JTextArea(12, 43);
+        display.setWrapStyleWord(true);
+        display.setLineWrap(true);
 
-        JTable table = new JTable(data, colHeads);
-        JScrollPane jsp = new JScrollPane(table);
-        add(jsp);
-//        add(new JScrollPane(display), BorderLayout.CENTER);
+        add(new JScrollPane(display), BorderLayout.PAGE_START);
     }
 }
 
@@ -55,7 +51,6 @@ public class FileServer extends JFrame implements ActionListener {
     private JLabel state;
     private JTabbedPane jtp;
 
-    private JTextArea display;
     private JButton time_btn;
     private JButton exit_btn;
     private JPanel button_pnl;
@@ -64,8 +59,6 @@ public class FileServer extends JFrame implements ActionListener {
     public FileServer(HostInfo pHost, ArrayList<FileDetails> pFiles) {
         super("File Server");
         file_server = new FileServerHandler(pFiles);
-
-        System.out.println(file_server.getFiles());
 
         state = new JLabel("IP-Address: " + pHost.getHostname() + ":" + pHost.getPort());
         add(state, BorderLayout.NORTH);
