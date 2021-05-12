@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 class MasterServerTrigger implements Runnable {
     Socket iSocket;
@@ -32,7 +33,8 @@ class MasterServerTrigger implements Runnable {
                 FileContainer content = (FileContainer) pkg.getiContent();
 
                 for (var file : content.getFiles()) {
-                    MasterServerUI.eTable.addRow(new Object[] {++MasterServerHandler.iNoFiles, file.getFile_name(), file.getSizeFormat(), pkg.getiMessage()});
+                    MasterServerHandler.iFileDetails.add(file);
+                    MasterServerUI.eTable.addRow(new Object[] {MasterServerHandler.iFileDetails.size(), file.getFile_name(), file.getSizeFormat(), pkg.getiMessage()});
                 }
             }
 
@@ -51,10 +53,11 @@ public class MasterServerHandler implements Runnable {
     private static ServerSocket iMasterServer;
     private static final int iPORT = 1234;
     private static Thread iThread = null;
-    public static int iNoFiles = 0;
+    public static ArrayList<FileDetails> iFileDetails;
 
     public MasterServerHandler() {
         iThread = new Thread(this);
+        iFileDetails = new ArrayList<>();
     }
 
     public ServerSocket getiMasterServer() {
