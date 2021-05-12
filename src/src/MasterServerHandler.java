@@ -3,12 +3,12 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-class MasterServerForFileServer implements Runnable {
+class MasterServerTrigger implements Runnable {
     Socket iSocket;
     ObjectInputStream iInStream;
     Thread iThread;
 
-    MasterServerForFileServer(Socket pSocket) {
+    MasterServerTrigger(Socket pSocket) {
         iSocket = pSocket;
 
         try {
@@ -80,10 +80,10 @@ public class MasterServerHandler implements Runnable {
         // Nhận các request từ cả hai phía `Client` và `FileServer`
         while (true) {
             try {
-                Socket client = iMasterServer.accept();
+                Socket socket = iMasterServer.accept();
                 System.out.println(">> New client accepted");
 
-                MasterServerForFileServer handler = new MasterServerForFileServer(client);
+                MasterServerTrigger handler = new MasterServerTrigger(socket);
                 handler.runThread();
             } catch (IOException err) {
                 err.printStackTrace();
