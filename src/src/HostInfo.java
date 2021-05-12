@@ -1,5 +1,3 @@
-package modules;
-
 public class HostInfo {
     private String hostname;
     private int port;

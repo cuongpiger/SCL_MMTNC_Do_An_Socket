@@ -1,8 +1,5 @@
-package modules;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -42,8 +39,6 @@ public class Utils {
         ArrayList<FileDetails> files = new ArrayList<>();
 
         if (lst_files != null) {
-            System.out.println("go here");
-
             for (File f : lst_files) {
                 FileDetails new_file = Utils.getFileDetails(f);
                 files.add(new_file);

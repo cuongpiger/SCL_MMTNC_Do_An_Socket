@@ -3,16 +3,16 @@ import java.util.ArrayList;
 
 public class FileContainer implements Serializable {
     private String ip; // IPv4 của file server để client tả file
-    private ArrayList<FileInfo> files; // danh sách các file từ file server tương ứng
+    private ArrayList<FileDetails> files; // danh sách các file từ file server tương ứng
     private static int port; // PORT của file server để client tải file
 
-    public FileContainer(String i, int p, ArrayList<FileInfo> f) {
+    public FileContainer(String i, int p, ArrayList<FileDetails> f) {
         ip = i;
         port = p;
         files = f;
     }
 
-    public ArrayList<FileInfo> getFiles() {
+    public ArrayList<FileDetails> getFiles() {
         return files;
     }
 

@@ -1,8 +1,3 @@
-import modules.FileDetails;
-import modules.FileServerHandler;
-import modules.HostInfo;
-import modules.Utils;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -46,7 +41,9 @@ class ColorsPanel extends JPanel {
 }
 
 public class FileServer extends JFrame implements ActionListener {
-    private FileServerHandler file_server = null;
+    private static HostInfo master = null; // master sever
+    private static HostInfo host = null; // file server
+    private static FileServerHandler file_server = null;
 
     private JLabel state;
     private JTabbedPane jtp;
@@ -56,15 +53,17 @@ public class FileServer extends JFrame implements ActionListener {
     private JPanel button_pnl;
     private final static String CONFIG_FILE = "./FS_config/host_info.txt";
 
-    public FileServer(HostInfo pHost, ArrayList<FileDetails> pFiles) {
+    public FileServer(HostInfo pHost, HostInfo pMaster, ArrayList<FileDetails> pFiles) {
         super("File Server");
-        file_server = new FileServerHandler(pFiles);
+        host = pHost;
+        master = pMaster;
+        file_server = new FileServerHandler(host, master, pFiles);
 
         state = new JLabel("IP-Address: " + pHost.getHostname() + ":" + pHost.getPort());
         add(state, BorderLayout.NORTH);
 
         jtp = new JTabbedPane();
-        jtp.addTab("List files", new FilesPanel(file_server.getFiles()));
+        jtp.addTab("List files", new FilesPanel(pFiles));
         jtp.addTab("Colors", new ColorsPanel());
         add(jtp, BorderLayout.CENTER);
 
@@ -74,14 +73,12 @@ public class FileServer extends JFrame implements ActionListener {
 //        add(new JScrollPane(display), BorderLayout.CENTER);
 
         button_pnl = new JPanel();
-        time_btn = new JButton("Get date and time");
-        time_btn.addActionListener(this);
-        button_pnl.add(time_btn);
-
         exit_btn = new JButton("Exit");
         exit_btn.addActionListener(this);
         button_pnl.add(exit_btn);
         add(button_pnl, BorderLayout.SOUTH);
+
+        file_server.talkToMasterServer();
     }
 
     public void actionPerformed(ActionEvent ev) {
@@ -91,28 +88,16 @@ public class FileServer extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        HostInfo host = Utils.getHostInfo("./file_server/config/host_info.txt"); // load thông tin về host IP và port của file server
-        ArrayList<FileDetails> files = Utils.loadResources("./file_server/data");
-        FileServer frame = new FileServer(host, files);
-
+        HostInfo host = Utils.getHostInfo("./config/host_info.txt"); // load thông tin về host IP và port của file server
+        HostInfo master = Utils.getHostInfo("./config/master_info.txt");
+        ArrayList<FileDetails> files = Utils.loadResources(FileServerHandler.RESOURCES);
+        FileServer frame = new FileServer(host, master, files);
 
         frame.setSize(500, 300);
         frame.setVisible(true);
         frame.addWindowListener(
                 new WindowAdapter() {
                     public void windowClosing(WindowEvent ev) {
-                        // check whether a socket is open
-//                        if (socket != null) {
-//                            try {
-//                                socket.close();
-//                            } catch (IOException err) {
-//                                System.out.println("==> Unable to close link!");
-//                                System.exit(1);
-//                            }
-//                        }
-
-
-
                         System.exit(0);
                     }
                 }

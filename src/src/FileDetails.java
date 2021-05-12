@@ -1,5 +1,3 @@
-package modules;
-
 import java.io.Serializable;
 
 public class FileDetails implements Serializable {

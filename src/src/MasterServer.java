@@ -2,12 +2,12 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-class FileServerHandler extends Thread {
+class MasterServerHandler extends Thread {
     private Socket secretary ; // nhận các `Package` từ `FileServer` và `lient`
     private ObjectInputStream in_stream;
     private PrintWriter out_stream;
 
-    public FileServerHandler(Socket fs) {
+    public MasterServerHandler(Socket fs) {
        secretary  = fs;
 
         try {
@@ -22,7 +22,7 @@ class FileServerHandler extends Thread {
         try {
             Package pkg = (Package) in_stream.readObject();
 
-            if (pkg.getService().equals(FileServer.LABEL)) {
+            if (pkg.getService().equals(FileServerHandler.LABEL)) {
                 FileContainer content = (FileContainer) pkg.getContent();
 
                 for (var file : content.getFiles()) {
@@ -56,7 +56,7 @@ public class MasterServer {
             Socket client = master_server.accept();
             System.out.println(">> New client accepted");
 
-            FileServerHandler handler = new FileServerHandler(client);
+            MasterServerHandler handler = new MasterServerHandler(client);
             handler.start();
         } while (true);
     }
