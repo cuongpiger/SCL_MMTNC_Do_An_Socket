@@ -37,7 +37,7 @@ public class FileServerHandler {
             master_server = new Socket(master.getHostname(), master.getPort());
             out_stream = new ObjectOutputStream(master_server.getOutputStream());
             FileContainer message = new FileContainer(master.getHostname(), master.getPort(), files);
-            Package pkg = new Package(LABEL, message);
+            Package pkg = new Package(LABEL, String.format("%s:%d", master.getHostname(), master.getPort()), message);
             out_stream.writeObject(pkg);
             out_stream.close();
             master_server.close();
