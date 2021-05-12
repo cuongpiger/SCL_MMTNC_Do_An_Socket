@@ -1,82 +1,128 @@
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import modules.FileDetails;
+import modules.FileServerHandler;
+import modules.HostInfo;
+import modules.Utils;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.io.*;
 
-public class FileServer {
-    private static ArrayList<FileInfo> files = null;
-    private static final String resources = "./data";
-    private static InetAddress master_host;
-    private static final int master_port = 1234;
-    private static ObjectOutputStream out_stream;
-    public static final String LABEL = "FileServer";
 
-    private void loadResources() {
-        File resource_folder = new File(resources);
-        File[] lst_files = resource_folder.listFiles();
+class FilesPanel extends JPanel {
+    private static JTable jtable = null;
 
-        if (lst_files != null) {
-            for (File f : lst_files) {
-                try {
-                    FileInfo new_file = getFileInfo(f);
-                    files.add(new_file);
-                } catch (IOException err) {
-                    continue;
-                }
-            }
+    public FilesPanel(ArrayList<FileDetails> pFiles) {
+        DefaultTableModel model = new DefaultTableModel();
+        jtable = new JTable(model);
+
+        model.addColumn("#ID");
+        model.addColumn("Filename");
+        model.addColumn("Size");
+
+        for (int i = 0; i < pFiles.size(); ++i) {
+            var tmp = pFiles.get(i);
+            model.addRow(new Object[]{i + 1, tmp.getFile_name(), tmp.getSizeFormat()});
         }
+
+        add(new JScrollPane(jtable), BorderLayout.CENTER);
+    }
+}
+
+class ColorsPanel extends JPanel {
+
+    public ColorsPanel() {
+//        display = new JTextArea(10, 15);
+//        display.setWrapStyleWord(true);
+//        display.setLineWrap(true);
+        Object[][] data = {};
+        String[] colHeads = {"Name", "Extension", "ID#"};
+
+        JTable table = new JTable(data, colHeads);
+        JScrollPane jsp = new JScrollPane(table);
+        add(jsp);
+//        add(new JScrollPane(display), BorderLayout.CENTER);
+    }
+}
+
+public class FileServer extends JFrame implements ActionListener {
+    private FileServerHandler file_server = null;
+
+    private JLabel state;
+    private JTabbedPane jtp;
+
+    private JTextArea display;
+    private JButton time_btn;
+    private JButton exit_btn;
+    private JPanel button_pnl;
+    private final static String CONFIG_FILE = "./FS_config/host_info.txt";
+
+    public FileServer(HostInfo pHost, ArrayList<FileDetails> pFiles) {
+        super("File Server");
+        file_server = new FileServerHandler(pFiles);
+
+        System.out.println(file_server.getFiles());
+
+        state = new JLabel("IP-Address: " + pHost.getHostname() + ":" + pHost.getPort());
+        add(state, BorderLayout.NORTH);
+
+        jtp = new JTabbedPane();
+        jtp.addTab("List files", new FilesPanel(file_server.getFiles()));
+        jtp.addTab("Colors", new ColorsPanel());
+        add(jtp, BorderLayout.CENTER);
+
+//        display = new JTextArea(10, 15);
+//        display.setWrapStyleWord(true);
+//        display.setLineWrap(true);
+//        add(new JScrollPane(display), BorderLayout.CENTER);
+
+        button_pnl = new JPanel();
+        time_btn = new JButton("Get date and time");
+        time_btn.addActionListener(this);
+        button_pnl.add(time_btn);
+
+        exit_btn = new JButton("Exit");
+        exit_btn.addActionListener(this);
+        button_pnl.add(exit_btn);
+        add(button_pnl, BorderLayout.SOUTH);
     }
 
-    private FileInfo getFileInfo(File file) throws IOException {
-        String file_name = file.getName();
-        long size = file.length();
-        String path = resources + "/" + file_name;
-
-        return new FileInfo(path, file_name, size);
-    }
-
-    public void printFiles() {
-        for (var file : files) {
-            System.out.println(">> " + file.getFile_name() + " | " + file.getSizeFormat());
+    public void actionPerformed(ActionEvent ev) {
+        if (ev.getSource() == exit_btn) {
+            System.exit(0);
         }
-    }
-
-    public static void talkToMasterServer() {
-        Socket master_server = null;
-
-        try {
-            master_server = new Socket(master_host, master_port);
-            out_stream = new ObjectOutputStream(master_server.getOutputStream());
-            FileContainer message = new FileContainer("rosie", 4567, files);
-            Package pkg = new Package(LABEL, message);
-            out_stream.writeObject(pkg);
-            out_stream.close();
-            master_server.close();
-        } catch (IOException err) {
-            err.printStackTrace();
-            System.exit(1);
-        }
-    }
-
-    FileServer() {
-        files = new ArrayList<>();
     }
 
     public static void main(String[] args) {
-        FileServer file_server = new FileServer();
-        file_server.loadResources();
-        System.out.println(">> Reading file completed");
-        file_server.printFiles();
-        System.out.println(">> Send file");
+        HostInfo host = Utils.getHostInfo("./file_server/config/host_info.txt"); // load thông tin về host IP và port của file server
+        ArrayList<FileDetails> files = Utils.loadResources("./file_server/data");
+        FileServer frame = new FileServer(host, files);
 
-        try {
-            master_host = InetAddress.getLocalHost();
-        } catch (UnknownHostException err) {
-            System.out.println("==> Host ID not found");
-            System.exit(1);
-        }
 
-        talkToMasterServer();
+        frame.setSize(500, 300);
+        frame.setVisible(true);
+        frame.addWindowListener(
+                new WindowAdapter() {
+                    public void windowClosing(WindowEvent ev) {
+                        // check whether a socket is open
+//                        if (socket != null) {
+//                            try {
+//                                socket.close();
+//                            } catch (IOException err) {
+//                                System.out.println("==> Unable to close link!");
+//                                System.exit(1);
+//                            }
+//                        }
+
+
+
+                        System.exit(0);
+                    }
+                }
+        );
     }
 }

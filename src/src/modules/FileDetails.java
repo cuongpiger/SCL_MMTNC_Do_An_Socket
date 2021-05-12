@@ -1,12 +1,14 @@
+package modules;
+
 import java.io.Serializable;
 
-public class FileInfo implements Serializable {
+public class FileDetails implements Serializable {
     private String path; // đường dẫn lưu file
     private String file_name; // tên file
     private long size; // kích thước file
     private long size_unit; // đơn vị file
 
-    FileInfo(String p, String fn, long s) {
+    FileDetails(String p, String fn, long s) {
         path = p;
         file_name = fn;
         size = s;
