@@ -7,7 +7,7 @@ import javax.swing.table.TableColumnModel;
 
 public class MasterServerUI {
     public JPanel iMainPnl;
-    public DefaultTableModel editor;
+    public DefaultTableModel iEditor;
     private JTable iFilesTbl;
     private JTable iActivitiesTbl;
     private JButton iCloseBtn;
@@ -18,7 +18,7 @@ public class MasterServerUI {
     private void setupiFilesTbl() {
         iFilesTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Size", "Address File-Server"}));
         TableColumnModel columns = iFilesTbl.getColumnModel();
-        editor = (DefaultTableModel) iFilesTbl.getModel();
+        iEditor = (DefaultTableModel) iFilesTbl.getModel();
         DefaultTableCellRenderer render_col = new DefaultTableCellRenderer();
         render_col.setHorizontalAlignment(JLabel.RIGHT);
         columns.getColumn(0).setMinWidth(20);
@@ -29,8 +29,8 @@ public class MasterServerUI {
         columns.getColumn(3).setMaxWidth(150);
         columns.getColumn(2).setCellRenderer(render_col);
         columns.getColumn(3).setCellRenderer(render_col);
-        iFilesTbl.setModel(editor);
-        editor.fireTableDataChanged();
+        iFilesTbl.setModel(iEditor);
+        iEditor.fireTableDataChanged();
     }
 
     public MasterServerUI(MasterServer pHandler) {
@@ -38,7 +38,7 @@ public class MasterServerUI {
         iLocal = Utils.loadHostInfo("./config/master.txt");
 
         setupiFilesTbl();
-        iHandler.startThread(editor);
+        iHandler.startThread(iEditor);
         iStatusLbl.setText(String.format("Master-sever is running on %s:%d", iLocal.getiAddress(), iLocal.getiPort()));
     }
 }
