@@ -39,6 +39,5 @@ public class FileServerUI {
         iStatusLbl.setText(String.format("File-Server is running on %s:%d", iHandler.getiLocal().getiAddress(), iHandler.getiLocal().getiPort()));
 
         setupiFilesTbl();
-        System.out.println(">> FileServerUtil constructor" + pHandler.getiLocal().getiPort());
     }
 }

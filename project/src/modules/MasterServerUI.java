@@ -13,9 +13,10 @@ public class MasterServerUI {
     private JButton iCloseBtn;
     private JLabel iStatusLbl;
     private static MasterServer iHandler;
+    private static HostInfo iLocal;
 
     private void setupiFilesTbl() {
-        iFilesTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Size", "Address"}));
+        iFilesTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Size", "Address File-Server"}));
         TableColumnModel columns = iFilesTbl.getColumnModel();
         editor = (DefaultTableModel) iFilesTbl.getModel();
         DefaultTableCellRenderer render_col = new DefaultTableCellRenderer();
@@ -24,6 +25,8 @@ public class MasterServerUI {
         columns.getColumn(0).setMaxWidth(40);
         columns.getColumn(2).setMinWidth(100);
         columns.getColumn(2).setMaxWidth(200);
+        columns.getColumn(3).setMinWidth(150);
+        columns.getColumn(3).setMaxWidth(150);
         columns.getColumn(2).setCellRenderer(render_col);
         columns.getColumn(3).setCellRenderer(render_col);
         iFilesTbl.setModel(editor);
@@ -32,8 +35,10 @@ public class MasterServerUI {
 
     public MasterServerUI(MasterServer pHandler) {
         iHandler = pHandler;
+        iLocal = Utils.loadHostInfo("./config/master.txt");
 
         setupiFilesTbl();
         iHandler.startThread(editor);
+        iStatusLbl.setText(String.format("Master-sever is running on %s:%d", iLocal.getiAddress(), iLocal.getiPort()));
     }
 }

@@ -11,14 +11,11 @@ class MasterServerController extends MasterServer implements Runnable {
     Socket iSocket;
     ObjectInputStream iInStream;
     Thread iThread;
-    DefaultTableModel iiEditor;
 
     MasterServerController(Socket pSocket) {
         iSocket = pSocket;
 
         try {
-
-            System.out.println("contrusctr");
             iInStream = new ObjectInputStream(iSocket.getInputStream());
             iThread = new Thread(this);
         } catch (IOException err) {
@@ -28,8 +25,7 @@ class MasterServerController extends MasterServer implements Runnable {
     }
 
     public void startThread(DefaultTableModel pEditor) {
-        iiEditor = pEditor;
-        this.iThread.start();
+        iThread.start();
 
         try {
             iThread.join();
@@ -40,9 +36,8 @@ class MasterServerController extends MasterServer implements Runnable {
     }
 
     public void run() {
-        iiEditor.setRowCount(0);
+        iEditor.setRowCount(0);
 
-        System.out.println("running in run() controller");
         try {
             Package box = (Package) iInStream.readObject();
             FileContainer container = (FileContainer) box.getiContent();
@@ -52,36 +47,36 @@ class MasterServerController extends MasterServer implements Runnable {
                 HostInfo host = container.getiFilerServer();
                 getFiles(files, host);
             }
+
+            iSocket.close();
         } catch (IOException | ClassNotFoundException err) {
             System.out.print("\uD83D\uDEAB MasterServerController.run(): ");
             err.printStackTrace();
         }
 
         for (int i = 0; i < iFiles.size(); ++i) {
-            iiEditor.addRow(new Object[] {
+            var host = iFiles.get(i).getiHost();
+            var file = iFiles.get(i).getiFile();
+
+            iEditor.addRow(new Object[] {
                     Integer.toString(i + 1),
-                    iFiles.get(i).getiFile().getiName(),
-                    iFiles.get(i).getiFile().getiSize(),
-                    iFiles.get(i).getiHost().getiAddress()
+                    file.getiName(),
+                    file.getiSize() + " bytes",
+                    String.format("%s:%d", host.getiAddress(), host.getiPort())
             });
         }
     }
 
     private synchronized void getFiles(ArrayList<FileDetails> pFiles, HostInfo pHost) {
-        for (var f : pFiles) {
-            boolean flag = false;
-
-            for (var file : iFiles) {
-                if (file.match(f, pHost.getiAddress())) {
-                    flag = true;
-                    break;
-                }
+        for (int i = 0; i < iFiles.size(); ++i) {
+            if (iFiles.get(i).getiHost().getiAddress().equals(pHost.getiAddress())) {
+                iFiles.remove(i);
             }
+        }
 
-            if (!flag) {
-                FileInfo new_file = new FileInfo(pHost, f);
-                iFiles.add(new_file);
-            }
+        for (var file : pFiles) {
+            FileInfo new_file = new FileInfo(pHost, file);
+            iFiles.add(new_file);
         }
     }
 }
@@ -93,7 +88,7 @@ public class MasterServer implements Runnable {
     private static Thread iThread;
     protected static ArrayList<Activity> iActivities;
     protected static ArrayList<FileInfo> iFiles;
-    private static DefaultTableModel iEditor;
+    protected static DefaultTableModel iEditor;
 
     public MasterServer() {
         iLocal = Utils.loadHostInfo("./config/master.txt");
@@ -120,12 +115,9 @@ public class MasterServer implements Runnable {
             return;
         }
 
-        System.out.println("Master server is running");
-
         while (flag) {
             try {
                 Socket socket = iMaster.accept();
-                System.out.println("new accepted");
                 MasterServerController handler = new MasterServerController(socket);
                 handler.startThread(iEditor);
             } catch (IOException err) {
