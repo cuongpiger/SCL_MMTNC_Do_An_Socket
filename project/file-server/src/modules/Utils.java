@@ -2,6 +2,7 @@ package modules;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Utils {
@@ -27,5 +28,27 @@ public class Utils {
         }
 
         return hi;
+    }
+
+    public static FileDetails getFileDetails(File pFile) {
+        String name = pFile.getName(); // tên file
+        long size = pFile.length(); // size của file
+
+        return new FileDetails(name, size);
+    }
+
+    public static ArrayList<FileDetails> loadResources(String pPath) {
+        File resources = new File(pPath);
+        File[] list_files = resources.listFiles();
+        ArrayList<FileDetails> files = new ArrayList<>();
+
+        if (list_files != null) {
+            for (File f : list_files) {
+                FileDetails new_file = getFileDetails(f);
+                files.add(new_file);
+            }
+        }
+
+        return files;
     }
 }
