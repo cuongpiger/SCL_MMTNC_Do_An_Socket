@@ -1,9 +1,11 @@
 package modules;
 
+import java.io.Serializable;
+
 /*
 * Lưu thông tin Ip-Address và Port
 * */
-public class HostInfo {
+public class HostInfo implements Serializable {
     private String iAddress; // Ip-Address
     private int iPort; // Port
 

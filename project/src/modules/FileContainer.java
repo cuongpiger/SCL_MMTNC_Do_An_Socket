@@ -1,12 +1,13 @@
 package modules;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /*
 * Một container dùng để chứa thông tin về address + port của file server
 * đồng thời thông tin về các file mà file server này đang có
 * */
-public class FileContainer {
+public class FileContainer implements Serializable {
     private HostInfo iFilerServer;
     private ArrayList<FileDetails> iFiles;
 

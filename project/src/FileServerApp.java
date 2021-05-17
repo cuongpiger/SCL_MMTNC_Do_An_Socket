@@ -3,7 +3,7 @@ import modules.FileServerUI;
 
 import javax.swing.*;
 
-public class App {
+public class FileServerApp {
     public static void main(String[] args) {
         FileServer handler = new FileServer();
 

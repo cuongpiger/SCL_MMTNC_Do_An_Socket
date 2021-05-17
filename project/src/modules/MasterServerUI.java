@@ -5,19 +5,19 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
-public class FileServerUI {
+public class MasterServerUI {
     public JPanel iMainPnl;
-    private JLabel iStatusLbl;
+    public DefaultTableModel editor;
     private JTable iFilesTbl;
     private JTable iActivitiesTbl;
     private JButton iCloseBtn;
-    private JButton iConnectBtn;
-    private static FileServer iHandler;
+    private JLabel iStatusLbl;
+    private static MasterServer iHandler;
 
     private void setupiFilesTbl() {
-        iFilesTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Size"}));
+        iFilesTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Size", "Address"}));
         TableColumnModel columns = iFilesTbl.getColumnModel();
-        DefaultTableModel editor = (DefaultTableModel) iFilesTbl.getModel();
+        editor = (DefaultTableModel) iFilesTbl.getModel();
         DefaultTableCellRenderer render_col = new DefaultTableCellRenderer();
         render_col.setHorizontalAlignment(JLabel.RIGHT);
         columns.getColumn(0).setMinWidth(20);
@@ -25,19 +25,15 @@ public class FileServerUI {
         columns.getColumn(2).setMinWidth(100);
         columns.getColumn(2).setMaxWidth(200);
         columns.getColumn(2).setCellRenderer(render_col);
-
-        var files = iHandler.getiFiles();
-        for (int i = 0; i < files.size(); ++i) {
-            var file = files.get(i);
-            editor.addRow(new Object[]{Integer.toString(i + 1),
-                    file.getiName(), String.format("%d bytes", file.getiSize())});
-        }
+        columns.getColumn(3).setCellRenderer(render_col);
+        iFilesTbl.setModel(editor);
+        editor.fireTableDataChanged();
     }
 
-    public FileServerUI(FileServer pHandler) {
+    public MasterServerUI(MasterServer pHandler) {
         iHandler = pHandler;
 
         setupiFilesTbl();
-        System.out.println(">> FileServerUtil constructor" + pHandler.getiLocal().getiPort());
+        iHandler.startThread(editor);
     }
 }
