@@ -1,6 +1,5 @@
 package modules;
 
-import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -59,6 +58,20 @@ class MasterServerController implements Runnable {
         iUI.updateiFilesTbl(iResources);
     }
 
+    private void handleClient(Package pBox) {
+        try {
+            ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());
+            Package pkg = new Package(MasterServer.LABEL, "New file-server is connecting", iResources);
+            shipper.writeObject(pkg);
+            shipper.close();
+        } catch (IOException err) {
+            System.out.print("\uD83D\uDEAB MasterServerController.run(): ");
+            err.printStackTrace();
+
+            iUI.showDialog("An error occurred while sending the resource to CLIENT!");
+        }
+    }
+
     public void run() {
         try {
             Package box = (Package) iInStream.readObject();
@@ -68,13 +81,7 @@ class MasterServerController implements Runnable {
                     handleFilesServer(box);
                 }
             } else if (box.getiService().equals(Client.LABEL)) {
-//                if (box.getiMessage().equals("GET-FILES")) {
-//                    ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());
-////                    FileImage image = new FileImage(iFiles);
-//                    Package box_files = new Package(MasterServer.LABEL, "New file-server is connecting", iFiles);
-//                    shipper.writeObject(box_files);
-//                    shipper.close();
-//                }
+                handleClient(box);
             }
 
             iSocket.close();

@@ -49,7 +49,6 @@ public class MasterServerUI extends JFrame implements ActionListener {
 
     public void updateiFilesTbl(ArrayList<FileContainer> pResources) {
         iFilesEditor.getDataVector().removeAllElements(); // clear content in iFilesEditor
-        iFilesEditor.setRowCount(0);
 
         for (FileContainer resource : pResources) {
             HostInfo host = resource.getiFileServer();
