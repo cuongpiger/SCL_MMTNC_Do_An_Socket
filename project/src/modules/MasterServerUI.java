@@ -38,7 +38,7 @@ public class MasterServerUI {
         iLocal = Utils.loadHostInfo("./config/master.txt");
 
         setupiFilesTbl();
-        iHandler.startThread(iEditor);
+        iHandler.startServer(iEditor);
         iStatusLbl.setText(String.format("Master-sever is running on %s:%d", iLocal.getiAddress(), iLocal.getiPort()));
     }
 }

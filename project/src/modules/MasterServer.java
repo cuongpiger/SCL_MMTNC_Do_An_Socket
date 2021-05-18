@@ -8,13 +8,17 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-class MasterServerController extends MasterServer implements Runnable {
+class MasterServerController implements Runnable {
     Socket iSocket;
     ObjectInputStream iInStream;
     Thread iThread;
+    ArrayList<FileInfo> iFiles;
+    static DefaultTableModel iEditor;
 
-    MasterServerController(Socket pSocket) {
+    MasterServerController(Socket pSocket, ArrayList<FileInfo> pFiles, DefaultTableModel pEditor) {
         iSocket = pSocket;
+        iFiles = pFiles;
+        iEditor = pEditor;
 
         try {
             iInStream = new ObjectInputStream(iSocket.getInputStream());
@@ -60,15 +64,11 @@ class MasterServerController extends MasterServer implements Runnable {
                     });
                 }
 
-                System.out.print("hello");
             } else if (box.getiService().equals(Client.LABEL)) {
-                System.out.print("hi");
                 if (box.getiMessage().equals("GET-FILES")) {
                     ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());
 //                    FileImage image = new FileImage(iFiles);
-                    Package box_files = new Package(LABEL, "New file-server is connecting", iFiles);
-
-                    System.out.print(iFiles.size());
+                    Package box_files = new Package(MasterServer.LABEL, "New file-server is connecting", iFiles);
                     shipper.writeObject(box_files);
                     shipper.close();
                 }
@@ -100,9 +100,9 @@ public class MasterServer implements Runnable {
     private static HostInfo iLocal;
     private static ServerSocket iMaster;
     private static Thread iThread;
-    protected static ArrayList<Activity> iActivities;
-    protected static ArrayList<FileInfo> iFiles;
-    protected static DefaultTableModel iEditor;
+    private static ArrayList<Activity> iActivities;
+    private static ArrayList<FileInfo> iFiles;
+    private static DefaultTableModel iEditor;
     public static final String LABEL = "MASTER";
 
     public MasterServer() {
@@ -110,11 +110,6 @@ public class MasterServer implements Runnable {
         iThread = new Thread(this);
         iActivities = new ArrayList<>();
         iFiles = new ArrayList<>();
-    }
-
-    public void startThread(DefaultTableModel pEditor) {
-        iEditor = pEditor;
-        iThread.start();
     }
 
     public void run() {
@@ -133,10 +128,10 @@ public class MasterServer implements Runnable {
         while (flag) {
             try {
                 Socket socket = iMaster.accept();
-                MasterServerController handler = new MasterServerController(socket);
+                MasterServerController handler = new MasterServerController(socket, iFiles, iEditor);
                 handler.startThread(iEditor);
 
-                System.out.print("new accepted");
+                System.out.println("new accepted");
             } catch (IOException err) {
                 System.out.print("\uD83D\uDEAB MasterServer.run(): ");
                 err.printStackTrace();
@@ -144,5 +139,10 @@ public class MasterServer implements Runnable {
                 return;
             }
         }
+    }
+
+    public void startServer(DefaultTableModel pEditor) {
+        iEditor = pEditor;
+        iThread.start();
     }
 }

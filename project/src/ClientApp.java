@@ -5,11 +5,9 @@ import javax.swing.*;
 
 public class ClientApp {
     public static void main(String[] args) {
-        Client handler = new Client();
-
-        JFrame frame = new JFrame("File Server");
+        JFrame frame = new JFrame("Client");
         frame.setSize(700, 500);
-        frame.setContentPane(new ClientUI(handler).iMainPnl);
+        frame.setContentPane(new ClientUI().iMainPnl);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }

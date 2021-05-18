@@ -54,12 +54,12 @@ public class ClientUI {
         iFilesEditor.fireTableDataChanged();
     }
 
-    public ClientUI(Client pHandler) {
-        iHandler = pHandler;
+    public ClientUI() {
+        iHandler = new Client();
 
         setupiFilesTbl();
         setupiDownloadTbl();
-        iHandler.startThread(iFilesEditor, iDownloadEditor);
+        iHandler.talkMaster(iFilesEditor, iDownloadEditor);
 //        iHandler.addRowFilesTbl();
     }
 }
