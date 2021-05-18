@@ -59,13 +59,13 @@ public class UDPClient {
             for (int i = 0; i < (count - 1); ++i) {
                 sendPacket = new DatagramPacket(fileBytes[i], PIECES_FILE, inetAddress, serverPort);
                 clientSocket.send(sendPacket);
-                waitServer(40);
+                // waitServer(40);
             }
 
             //send last bytes of file
             sendPacket = new DatagramPacket(fileBytes[count - 1], PIECES_FILE, inetAddress, serverPort);
             clientSocket.send(sendPacket);
-            waitServer(40);
+            // waitServer(40);
             bis.close();
         } catch (UnknownHostException err) {
             err.printStackTrace();
@@ -85,7 +85,7 @@ public class UDPClient {
     }
 
     public static void main(String[] args) {
-        String sourcePath = "./test.mp3";
+        String sourcePath = "./test.pdf";
         String destination = "./test/";
         UDPClient client = new UDPClient();
         client.connectServer();

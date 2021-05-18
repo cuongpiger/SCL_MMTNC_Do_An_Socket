@@ -11,6 +11,7 @@ public class MasterServerApp {
         frame.setSize(700, 500);
         frame.setContentPane(new MasterServerUI(handler).iMainPnl);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 }
