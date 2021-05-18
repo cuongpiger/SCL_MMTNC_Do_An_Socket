@@ -80,12 +80,13 @@
           <size top="5" left="10" bottom="5" right="10"/>
         </border>
         <children>
-          <component id="9bdde" class="javax.swing.JButton" binding="iCloseBtn">
+          <component id="9bdde" class="javax.swing.JButton" binding="iStartBtn">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Close"/>
+              <background color="-16776961"/>
+              <text value="START"/>
             </properties>
           </component>
         </children>

@@ -9,16 +9,16 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 class MasterServerController implements Runnable {
-    Socket iSocket;
-    ObjectInputStream iInStream;
-    Thread iThread;
-    ArrayList<FileInfo> iFiles;
-    static DefaultTableModel iEditor;
+    Socket iSocket = null;
+    ObjectInputStream iInStream = null;
+    Thread iThread = null;
+    ArrayList<FileContainer> iResources = null;
+    MasterServerUI iUI = null;
 
-    MasterServerController(Socket pSocket, ArrayList<FileInfo> pFiles, DefaultTableModel pEditor) {
+    MasterServerController(Socket pSocket, ArrayList<FileContainer> pResources, MasterServerUI pUI) {
         iSocket = pSocket;
-        iFiles = pFiles;
-        iEditor = pEditor;
+        iResources = pResources;
+        iUI = pUI;
 
         try {
             iInStream = new ObjectInputStream(iSocket.getInputStream());
@@ -26,10 +26,13 @@ class MasterServerController implements Runnable {
         } catch (IOException err) {
             System.out.print("\uD83D\uDEAB MasterServerController's constructor: ");
             err.printStackTrace();
+
+            iUI.showDialog("An error occurred while getting the resource from FILE-SERVER!");
+            iSocket = null;
         }
     }
 
-    public void startThread(DefaultTableModel pEditor) {
+    public void startThread() {
         iThread.start();
 
         try {
@@ -37,7 +40,23 @@ class MasterServerController implements Runnable {
         } catch (InterruptedException err) {
             System.out.print("\uD83D\uDEAB MasterServerController.startThread(): ");
             err.printStackTrace();
+
+            iUI.showDialog("An error occurred while getting the resource from FILE-SERVER!");
+            iSocket = null;
         }
+    }
+
+    private synchronized void handleFilesServer(Package pBox) {
+        FileContainer container = (FileContainer) pBox.getiContent();
+        // Xóa toàn bộ file mà container này có
+        for (int i = 0; i < iResources.size(); ++i) {
+            if (iResources.get(i).getiFileServer().getiAddress().equals(container.getiFileServer().getiAddress())) {
+                iResources.remove(i);
+                break;
+            }
+        }
+        iResources.add(container); // thêm container mới vào
+        iUI.updateiFilesTbl(iResources);
     }
 
     public void run() {
@@ -45,104 +64,90 @@ class MasterServerController implements Runnable {
             Package box = (Package) iInStream.readObject();
 
             if (box.getiService().equals(FileServer.LABEL)) {
-                iEditor.setRowCount(0);
-
-                FileContainer container = (FileContainer) box.getiContent();
-                ArrayList<FileDetails> files = container.getiFiles();
-                HostInfo host = container.getiFilerServer();
-                getFiles(files, host);
-
-                for (int i = 0; i < iFiles.size(); ++i) {
-                    var tmp_host = iFiles.get(i).getiHost();
-                    var file = iFiles.get(i).getiFile();
-
-                    iEditor.addRow(new Object[] {
-                            Integer.toString(i + 1),
-                            file.getiName(),
-                            file.getiSize() + " bytes",
-                            String.format("%s:%d", tmp_host.getiAddress(), tmp_host.getiPort())
-                    });
-                }
-
+                handleFilesServer(box);
             } else if (box.getiService().equals(Client.LABEL)) {
-                if (box.getiMessage().equals("GET-FILES")) {
-                    ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());
-//                    FileImage image = new FileImage(iFiles);
-                    Package box_files = new Package(MasterServer.LABEL, "New file-server is connecting", iFiles);
-                    shipper.writeObject(box_files);
-                    shipper.close();
-                }
+//                if (box.getiMessage().equals("GET-FILES")) {
+//                    ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());
+////                    FileImage image = new FileImage(iFiles);
+//                    Package box_files = new Package(MasterServer.LABEL, "New file-server is connecting", iFiles);
+//                    shipper.writeObject(box_files);
+//                    shipper.close();
+//                }
             }
 
             iSocket.close();
         } catch (IOException | ClassNotFoundException err) {
             System.out.print("\uD83D\uDEAB MasterServerController.run(): ");
             err.printStackTrace();
-        }
-    }
 
-    private synchronized void getFiles(ArrayList<FileDetails> pFiles, HostInfo pHost) {
-        for (int i = 0; i < iFiles.size(); ++i) {
-            if (iFiles.get(i).getiHost().getiAddress().equals(pHost.getiAddress())) {
-                iFiles.remove(i);
-            }
+            iUI.showDialog("An error occurred while getting the resource from FILE-SERVER!");
         }
 
-        for (var file : pFiles) {
-            FileInfo new_file = new FileInfo(pHost, file);
-            iFiles.add(new_file);
-        }
+        iSocket = null;
+        iThread.interrupt();
     }
 }
 
 
 public class MasterServer implements Runnable {
+    public static final String LABEL = "MASTER";
     private static HostInfo iLocal;
-    private static ServerSocket iMaster;
+    private static ServerSocket iMaster = null;
     private static Thread iThread;
     private static ArrayList<Activity> iActivities;
-    private static ArrayList<FileInfo> iFiles;
-    private static DefaultTableModel iEditor;
-    public static final String LABEL = "MASTER";
+    private static ArrayList<FileContainer> iResources;
+    private static MasterServerUI iUI = null;
 
-    public MasterServer() {
+    public MasterServer(MasterServerUI pUI) {
+        if (iThread == null) {
+            iThread = new Thread(this);
+        }
+
+        iUI = pUI;
         iLocal = Utils.loadHostInfo("./config/master.txt");
-        iThread = new Thread(this);
-        iActivities = new ArrayList<>();
-        iFiles = new ArrayList<>();
+        iResources = new ArrayList<>();
     }
 
     public void run() {
-        boolean flag = false;
-
-        try {
-            iMaster = new ServerSocket(iLocal.getiPort());
-            flag = true;
-        } catch (IOException err) {
-            System.out.print("\uD83D\uDEAB MasterServer.run(): ");
-            err.printStackTrace();
-
-            return;
-        }
-
-        while (flag) {
+        startServer();
+        while (iMaster != null) { // MASTER-SERVER khởi chạy thành công
             try {
                 Socket socket = iMaster.accept();
-                MasterServerController handler = new MasterServerController(socket, iFiles, iEditor);
-                handler.startThread(iEditor);
-
-                System.out.println("new accepted");
+                MasterServerController handler = new MasterServerController(socket, iResources, iUI);
+                handler.startThread();
             } catch (IOException err) {
                 System.out.print("\uD83D\uDEAB MasterServer.run(): ");
                 err.printStackTrace();
 
-                return;
+                try {
+                    iMaster.close();
+                } catch (IOException errr) {
+                    System.out.print("\uD83D\uDEAB MasterServer.run(): ");
+                    errr.printStackTrace();
+                }
+
+                iUI.showDialog("An error occurred while getting the resource from FILE-SERVER!");
             }
         }
     }
 
-    public void startServer(DefaultTableModel pEditor) {
-        iEditor = pEditor;
+    public void startThread() {
         iThread.start();
+    }
+
+    private void startServer() {
+        try {
+            iMaster = new ServerSocket(iLocal.getiPort());
+        } catch (IOException err) {
+            System.out.print("\uD83D\uDEAB MasterServer.run(): ");
+            err.printStackTrace();
+
+            iMaster = null;
+            iUI.showDialog("MASTER-SERVER launch failed!");
+        }
+
+        if (iMaster != null) {
+            iUI.updateiStatusLbl(String.format("MASTER-SERVER is running on %s:%d", iLocal.getiAddress(), iLocal.getiPort()));
+        }
     }
 }

@@ -8,16 +8,16 @@ import java.util.ArrayList;
 * đồng thời thông tin về các file mà file server này đang có
 * */
 public class FileContainer implements Serializable {
-    private HostInfo iFilerServer;
+    private HostInfo iFileServer;
     private ArrayList<FileDetails> iFiles;
 
     public FileContainer(HostInfo pFileServer, ArrayList<FileDetails> pFiles) {
-        iFilerServer = pFileServer;
+        iFileServer = pFileServer;
         iFiles = pFiles;
     }
 
-    public HostInfo getiFilerServer() {
-        return iFilerServer;
+    public HostInfo getiFileServer() {
+        return iFileServer;
     }
 
     public ArrayList<FileDetails> getiFiles() {

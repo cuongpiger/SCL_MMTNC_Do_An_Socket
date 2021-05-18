@@ -12,7 +12,6 @@ public class FileServer implements Runnable {
     private static HostInfo iMaster;
     private static ArrayList<FileDetails> iFiles = null;
     private static Thread iThread = null;
-    private static String iCommand = null;
     private static FileServerUI iUI = null;
     private static boolean iIsRunning = false; // FILE-SERVER đã sẵn sàng cho phép CLIENT tải file hay chưa
 
@@ -50,7 +49,6 @@ public class FileServer implements Runnable {
             Package box = new Package(LABEL, "New file-server is connecting", container);
             shipper.writeObject(box);
             master.close();
-
             return;
         } catch (UnknownHostException err) {
             System.out.print("\uD83D\uDEAB FileServer.talkMaster(): ");
@@ -68,17 +66,8 @@ public class FileServer implements Runnable {
 
     @Override
     public void run() {
-        if (iCommand == null) return; // nếu ko có chỉ thị gì
-
-        if (iCommand.equals("SEND-FILES-TO-MASTER")) { // gửi các file hiện có cho MASTER-SERVER
-            sendFiles();
-            iCommand = null;
-        }
-
-        if (iCommand.equals("START-FILE-SERVER")) { // chạy FILE-SERVER sẵn sàng cho các CLIENT tải tài nguyên
-            // something code here
-            iCommand = null;
-        }
+        sendFiles();
+        iThread = null;
     }
 
     /*
@@ -86,8 +75,11 @@ public class FileServer implements Runnable {
     * - PARAMS
     *   > pCommand: các chỉ thị lệnh do USER nhấn vào các swing component để thi hành các chức năng tương ứng
     * */
-    public void startThread(String pCommand) {
-        iCommand = pCommand;
-        iThread.start();
+    public void start(String pCommand) {
+        if (pCommand.equals("SEND-FILES-TO-MASTER")) {
+            if (iThread == null) iThread = new Thread(this);
+
+            iThread.start();
+        }
     }
 }

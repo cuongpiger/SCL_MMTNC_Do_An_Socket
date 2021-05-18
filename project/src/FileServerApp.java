@@ -1,4 +1,3 @@
-import modules.FileServer;
 import modules.FileServerUI;
 
 import javax.swing.*;
@@ -7,9 +6,8 @@ import java.awt.event.WindowEvent;
 
 public class FileServerApp {
     public static void main(String[] args) {
-        FileServerUI frame = new FileServerUI();
+        FileServerUI frame = new FileServerUI("File Server");
         frame.setSize(700, 500);
-        frame.setContentPane(new FileServerUI().iMainPnl);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

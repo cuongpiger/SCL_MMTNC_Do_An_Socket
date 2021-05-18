@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class FileServerUI extends JFrame implements ActionListener {
-    public JPanel iMainPnl;
+    private JPanel iMainPnl;
     private JLabel iStatusLbl;
     private JTable iFilesTbl;
     private JTable iActivitiesTbl;
@@ -31,6 +31,7 @@ public class FileServerUI extends JFrame implements ActionListener {
         columns.getColumn(2).setMinWidth(100);
         columns.getColumn(2).setMaxWidth(200);
         columns.getColumn(2).setCellRenderer(render_col);
+        iFilesTbl.setModel(iFilesEditor); // coi chừng dòng này
     }
 
     private void updateiFilesTbl(ArrayList<FileDetails> pFiles) {
@@ -73,7 +74,7 @@ public class FileServerUI extends JFrame implements ActionListener {
                 // run server
                 iStartBtn.setText("STOP");
                 iStartBtn.setBackground(Color.RED);
-                
+
                 return;
             }
 
@@ -90,12 +91,13 @@ public class FileServerUI extends JFrame implements ActionListener {
             iHandler = new FileServer(this);
             ArrayList<FileDetails> files = iHandler.getiFiles();
             updateiFilesTbl(files); // update iFilesTbl
-            iHandler.startThread("SEND-FILES-TO-MASTER");
+            iHandler.start("SEND-FILES-TO-MASTER");
         }
     }
 
-    public FileServerUI() {
-        super("File Server");
+    public FileServerUI(String pTitle) {
+        super(pTitle);
+        setContentPane(iMainPnl);
         setupiFilesTbl();
         setupActionListeners();
     }
