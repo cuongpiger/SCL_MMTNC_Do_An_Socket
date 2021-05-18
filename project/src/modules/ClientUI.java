@@ -59,6 +59,7 @@ public class ClientUI {
 
         setupiFilesTbl();
         setupiDownloadTbl();
-
+        iHandler.startThread(iFilesEditor, iDownloadEditor);
+//        iHandler.addRowFilesTbl();
     }
 }

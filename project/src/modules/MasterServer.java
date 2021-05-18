@@ -3,6 +3,7 @@ package modules;
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -36,34 +37,47 @@ class MasterServerController extends MasterServer implements Runnable {
     }
 
     public void run() {
-        iEditor.setRowCount(0);
-
         try {
             Package box = (Package) iInStream.readObject();
-            FileContainer container = (FileContainer) box.getiContent();
 
             if (box.getiService().equals(FileServer.LABEL)) {
+                iEditor.setRowCount(0);
+
+                FileContainer container = (FileContainer) box.getiContent();
                 ArrayList<FileDetails> files = container.getiFiles();
                 HostInfo host = container.getiFilerServer();
                 getFiles(files, host);
+
+                for (int i = 0; i < iFiles.size(); ++i) {
+                    var tmp_host = iFiles.get(i).getiHost();
+                    var file = iFiles.get(i).getiFile();
+
+                    iEditor.addRow(new Object[] {
+                            Integer.toString(i + 1),
+                            file.getiName(),
+                            file.getiSize() + " bytes",
+                            String.format("%s:%d", tmp_host.getiAddress(), tmp_host.getiPort())
+                    });
+                }
+
+                System.out.print("hello");
+            } else if (box.getiService().equals(Client.LABEL)) {
+                System.out.print("hi");
+                if (box.getiMessage().equals("GET-FILES")) {
+                    ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());
+//                    FileImage image = new FileImage(iFiles);
+                    Package box_files = new Package(LABEL, "New file-server is connecting", iFiles);
+
+                    System.out.print(iFiles.size());
+                    shipper.writeObject(box_files);
+                    shipper.close();
+                }
             }
 
             iSocket.close();
         } catch (IOException | ClassNotFoundException err) {
             System.out.print("\uD83D\uDEAB MasterServerController.run(): ");
             err.printStackTrace();
-        }
-
-        for (int i = 0; i < iFiles.size(); ++i) {
-            var host = iFiles.get(i).getiHost();
-            var file = iFiles.get(i).getiFile();
-
-            iEditor.addRow(new Object[] {
-                    Integer.toString(i + 1),
-                    file.getiName(),
-                    file.getiSize() + " bytes",
-                    String.format("%s:%d", host.getiAddress(), host.getiPort())
-            });
         }
     }
 
@@ -89,6 +103,7 @@ public class MasterServer implements Runnable {
     protected static ArrayList<Activity> iActivities;
     protected static ArrayList<FileInfo> iFiles;
     protected static DefaultTableModel iEditor;
+    public static final String LABEL = "MASTER";
 
     public MasterServer() {
         iLocal = Utils.loadHostInfo("./config/master.txt");
@@ -120,6 +135,8 @@ public class MasterServer implements Runnable {
                 Socket socket = iMaster.accept();
                 MasterServerController handler = new MasterServerController(socket);
                 handler.startThread(iEditor);
+
+                System.out.print("new accepted");
             } catch (IOException err) {
                 System.out.print("\uD83D\uDEAB MasterServer.run(): ");
                 err.printStackTrace();

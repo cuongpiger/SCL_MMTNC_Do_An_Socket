@@ -1,6 +1,8 @@
 package modules;
 
-public class FileInfo {
+import java.io.Serializable;
+
+public class FileInfo implements Serializable {
     private HostInfo iHost;
     private FileDetails iFile;
 
