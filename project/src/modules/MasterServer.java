@@ -64,7 +64,9 @@ class MasterServerController implements Runnable {
             Package box = (Package) iInStream.readObject();
 
             if (box.getiService().equals(FileServer.LABEL)) {
-                handleFilesServer(box);
+                if (box.getiMessage().equals("CONNECT")) {
+                    handleFilesServer(box);
+                }
             } else if (box.getiService().equals(Client.LABEL)) {
 //                if (box.getiMessage().equals("GET-FILES")) {
 //                    ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());

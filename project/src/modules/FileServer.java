@@ -46,7 +46,7 @@ public class FileServer implements Runnable {
             Socket master = new Socket(iMaster.getiAddress(), iMaster.getiPort());
             ObjectOutputStream shipper = new ObjectOutputStream(master.getOutputStream());
             FileContainer container = new FileContainer(iLocal, iFiles);
-            Package box = new Package(LABEL, "New file-server is connecting", container);
+            Package box = new Package(LABEL, "CONNECT", container);
             shipper.writeObject(box);
             master.close();
             return;
