@@ -10,7 +10,6 @@ public class FileServer {
     public static final String LABEL = "FILE-SERVER";
     private static HostInfo iLocal;
     private static HostInfo iMaster;
-    private static FileServerController iController;
     private static ArrayList<FileDetails> iFiles;
 
     public FileServer() {
