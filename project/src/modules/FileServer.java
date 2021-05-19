@@ -103,7 +103,7 @@ class FileServerShipper implements Runnable {
                     iBuffer = baos.toByteArray();
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iHost.getiPort());
                     iSocket.send(iOutPacket);
-                    System.out.println(iInPacket.getAddress());
+                    System.out.println(iInPacket.getAddress() + ":" + iHost.getiPort());
 
                     System.out.println("here");
                     current_state = 1; // đã gửi file info đến client
