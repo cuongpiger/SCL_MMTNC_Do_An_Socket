@@ -114,6 +114,7 @@ class FileServerShipper implements Runnable {
                         bis.read(iBuffer, 0, FileServerController.PIECE);
                         iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                         iSocket.send(iOutPacket);
+                        System.out.println(">> sent partition: " + (i + 1));
                     }
 
                     // gửi những byte cuối cùng
