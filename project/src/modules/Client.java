@@ -84,7 +84,7 @@ class ClientController implements Runnable {
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
                     iSocket.send(iOutPacket);
 
-                    byte[] tmpbuffer = new byte[FileServerController.PIECE];
+                    byte[] tmpbuffer = new byte[30000];
                     DatagramPacket tmppacket = new DatagramPacket(tmpbuffer, tmpbuffer.length);
                     iSocket.receive(tmppacket);
 
