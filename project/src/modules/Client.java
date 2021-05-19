@@ -64,20 +64,24 @@ class ClientController implements Runnable {
     public void run() {
         try {
             iSocket = new DatagramSocket();
-            iBuffer = prepareOrder();
+            iBuffer = prepareOrder(); // chuẩn bị các thông tin về file cần tải
 
             if (iBuffer != null && iFileServer != null) {
                 iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
-                iSocket.send(iOutPacket);
+                iSocket.send(iOutPacket); // gửi đi
 
                 iBuffer = new byte[FileServerController.PIECE];
                 iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
-                iSocket.receive(iInPacket);
+                iSocket.receive(iInPacket); // nhận file info về
 
-                System.out.println("send file thành công");
+                ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
+                ObjectInputStream ois = new ObjectInputStream(bais);
+                FileInfo file_info = (FileInfo) ois.readObject();
+
+                System.out.println(file_info.getiFileDetails().getiName());
             }
 
-        } catch (IOException err) {
+        } catch (IOException | ClassNotFoundException err) {
             System.out.print("\uD83D\uDEAB ClientController.run(): ");
             err.printStackTrace();
 
