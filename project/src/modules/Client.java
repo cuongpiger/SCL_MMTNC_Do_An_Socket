@@ -57,14 +57,14 @@ class ClientController implements Runnable {
 
     private FileInfo receiveFileInfo() {
         try {
-
-            System.out.println("run here");
             iBuffer = new byte[FileServerController.PIECE];
             iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
             iSocket.receive(iInPacket);
             ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
             FileInfo file_info = (FileInfo) ois.readObject();
+
+            System.out.println("run here");
 
             return file_info;
         } catch (IOException | ClassNotFoundException err) {
