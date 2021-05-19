@@ -68,6 +68,7 @@ class ClientController implements Runnable {
                     iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
                     iSocket.receive(iInPacket);
                     bos.write(iBuffer, 0, FileServerController.PIECE);
+                    System.out.println("done a partition");
                 }
 
                 // viết cái byte cuối cùng
