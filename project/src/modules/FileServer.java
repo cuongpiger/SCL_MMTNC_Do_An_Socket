@@ -101,7 +101,7 @@ class FileServerShipper implements Runnable {
                     oo.close();
 
                     iBuffer = baos.toByteArray();
-                    iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iHost.getiPort());
+                    iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                     iSocket.send(iOutPacket);
                     System.out.println(iInPacket.getAddress() + ":" + iHost.getiPort());
 

@@ -71,7 +71,7 @@ class ClientController implements Runnable {
                 iSocket.send(iOutPacket);
 
                 iBuffer = new byte[FileServerController.PIECE];
-                iInPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
+                iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
                 iSocket.receive(iInPacket);
 
                 System.out.println("send file thành công");
