@@ -84,21 +84,31 @@ class ClientController implements Runnable {
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
                     iSocket.send(iOutPacket);
 
+                    iBuffer = new byte[FileServerController.PIECE];
+                    iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
+                    iSocket.receive(iInPacket);
+                    System.out.println(">>>>>");
+                    ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
+                    ObjectInputStream ois = new ObjectInputStream(bais);
+                    FileInfo file_info = (FileInfo) ois.readObject();
+
+                    System.out.println("run here");
+
                     System.out.println("send file thành công");
                     current_state = 1;
-                } catch (IOException err) {
+                } catch (IOException | ClassNotFoundException err) {
                     err.printStackTrace();
                     current_state = 0;
                 }
             }
 
-            if (current_state == 1) { // gửi thông tin file cần tải đến cho file server thành công
-                FileInfo file_info = receiveFileInfo(); // nhận thông tin file cần tải
-
-                if (file_info != null) {
-                    System.out.println(">> " + file_info.getiFileDetails().getiName());
-                }
-            }
+//            if (current_state == 1) { // gửi thông tin file cần tải đến cho file server thành công
+//                FileInfo file_info = receiveFileInfo(); // nhận thông tin file cần tải
+//
+//                if (file_info != null) {
+//                    System.out.println(">> " + file_info.getiFileDetails().getiName());
+//                }
+//            }
         }
     }
 
