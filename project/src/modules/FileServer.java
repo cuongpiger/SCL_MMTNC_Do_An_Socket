@@ -12,6 +12,7 @@ class FileServerController implements Runnable {
     private static FileServerUI iUI = null;
     private static Thread iThread = null;
     private static ArrayList<FileDetails> iFiles = null;
+    private static DatagramPacket iInPacket = null;
 
     public FileServerController(HostInfo pHost, FileServerUI pUI, ArrayList<FileDetails> pFiles) {
         iHost = pHost;
@@ -36,12 +37,11 @@ class FileServerController implements Runnable {
         openServer();
         while (iServer != null) {
             byte[] buffer = new byte[PIECE];
-            DatagramPacket order;
 
             try {
-                order = new DatagramPacket(buffer, buffer.length);
-                iServer.receive(order);
-                FileServerShipper shipper = new FileServerShipper(iServer, order, iFiles, iHost);
+                iInPacket = new DatagramPacket(buffer, buffer.length);
+                iServer.receive(iInPacket); // code từ khúc này lên trên ổn
+                FileServerShipper shipper = new FileServerShipper(iInPacket, iFiles, iHost);
                 shipper.startThread();
             } catch (IOException err) {
                 System.out.print("\uD83D\uDEAB FileServerController.openServer(): ");
@@ -60,32 +60,38 @@ class FileServerController implements Runnable {
 }
 
 class FileServerShipper implements Runnable {
-    private DatagramPacket iOrder = null;
+    private DatagramPacket iInPacket = null;
+    private DatagramPacket iOutPacket = null;
     private ArrayList<FileDetails> iFiles = null;
     private Thread iThread = null;
     private HostInfo iHost = null;
-    private static DatagramSocket iServer = null;
+    private byte[] iBuffer = null;
+    private DatagramSocket iServer = null;
 
-    public FileServerShipper(DatagramSocket pServer, DatagramPacket pOrder, ArrayList<FileDetails> pFiles, HostInfo pHost) {
-        iServer = pServer;
-        iOrder = pOrder;
+    public FileServerShipper(DatagramPacket pInPacket, ArrayList<FileDetails> pFiles, HostInfo pHost) {
+        iInPacket = pInPacket;
         iFiles = pFiles;
         iHost = pHost;
-        iThread = new Thread(this);
+
+        // nguyên cái constructor này ổn
     }
 
     public void run() {
         int current_state = 0;
 
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(iOrder.getData());
+            iServer = new DatagramSocket();
+            ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
             Package pkg = (Package) ois.readObject();
+            // khúc này lên trên ổn
+
 
             if (pkg != null && pkg.getiService().equals(Client.LABEL) && pkg.getiMessage().equals("DOWNLOADED-FILE")) {
                 String filename = (String) pkg.getiContent();
                 FileDetails file_details = getFileDetails(filename); // tìm gói tin
                 File file_send = new File("./resources/" + file_details.getiName());
+                // khúc này lên trên cũng ổn
 
                 if (file_details != null && file_send != null) {
                     FileInfo bale = genFileInfo(file_send, file_details);
@@ -94,26 +100,26 @@ class FileServerShipper implements Runnable {
                     oo.writeObject(bale);
                     oo.close();
 
-                    byte[] send_file = baos.toByteArray();
-                    DatagramPacket send_packet = new DatagramPacket(send_file, send_file.length, iOrder.getAddress(), iOrder.getPort());
-                    System.out.println(iOrder.getAddress());
-                    iServer.send(send_packet);
+                    iBuffer = baos.toByteArray();
+                    iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iHost.getiPort());
+                    iServer.send(iOutPacket);
+                    System.out.println(iInPacket.getAddress());
+
+                    System.out.println("here");
                     current_state = 1; // đã gửi file info đến client
                 }
             }
 
-            if (current_state == 1) { // nếu đã gửi file info cho server rồi thì vô đây
-                byte[] buffer = new byte[FileServerController.PIECE];
-                DatagramPacket order = new DatagramPacket(buffer, buffer.length);
-                iServer.receive(order);
-
-            }
+//            if (current_state == 1) { // nếu đã gửi file info cho server rồi thì vô đây
+//                return;
+//            }
         } catch (IOException | ClassNotFoundException err) {
 
         }
     }
 
     public void startThread() {
+        iThread = new Thread(this);
         iThread.start();
     }
 
@@ -196,10 +202,10 @@ public class FileServer implements Runnable {
     }
 
     /*
-    * Chạy luồng này
-    * - PARAMS
-    *   > pCommand: các chỉ thị lệnh do USER nhấn vào các swing component để thi hành các chức năng tương ứng
-    * */
+     * Chạy luồng này
+     * - PARAMS
+     *   > pCommand: các chỉ thị lệnh do USER nhấn vào các swing component để thi hành các chức năng tương ứng
+     * */
     public void start(String pCommand) {
         if (pCommand.equals("SEND-FILES-TO-MASTER")) {
             if (iThread == null) iThread = new Thread(this);
