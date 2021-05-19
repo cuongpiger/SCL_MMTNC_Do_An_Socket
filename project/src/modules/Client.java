@@ -76,7 +76,7 @@ class ClientController implements Runnable {
         while (iSocket != null) {
             byte[] buffer = prepareOrder();
 
-            if (iBuffer != null && iFileServer != null) {
+            if (buffer != null && iFileServer != null) {
                 try {
                     DatagramPacket box = new DatagramPacket(buffer, buffer.length, iFileServer, iFileServerHost.getiPort());
                     iSocket.send(box);
