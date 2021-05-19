@@ -20,7 +20,7 @@ public class ClientUI extends JFrame implements ActionListener {
     private static DefaultTableModel iFilesEditor;
 
     private void setupiDownloadTbl() {
-        iDownloadTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Status", "Size", "Address File-Server"}));
+        iDownloadTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Status", "Size"}));
         iDownloadEditor = (DefaultTableModel) iDownloadTbl.getModel();
         TableColumnModel columns = iDownloadTbl.getColumnModel();
         DefaultTableCellRenderer render_col = new DefaultTableCellRenderer();
@@ -31,11 +31,21 @@ public class ClientUI extends JFrame implements ActionListener {
         columns.getColumn(2).setMaxWidth(100);
         columns.getColumn(3).setMinWidth(100);
         columns.getColumn(3).setMaxWidth(200);
-        columns.getColumn(4).setMinWidth(150);
-        columns.getColumn(4).setMaxWidth(150);
         columns.getColumn(3).setCellRenderer(render_col);
-        columns.getColumn(4).setCellRenderer(render_col);
         iDownloadTbl.setModel(iDownloadEditor);
+    }
+
+    public void addNewRowToDownloadTbl(FileDetails pFile) {
+        int no_rows = iDownloadTbl.getRowCount();
+        iDownloadEditor.addRow(new Object[] {no_rows, pFile.getiName(), "Downloading", String.format("%d bytes", pFile.getiSize())});
+    }
+
+    public int getRowCountDownloadTbl() {
+        return iDownloadTbl.getRowCount();
+    }
+
+    public void updateDoneStatusDownloadTbl(int id) {
+        iDownloadTbl.setValueAt("Downloaded", id, 2);
     }
 
     private void setupiFilesTbl() {
@@ -60,6 +70,7 @@ public class ClientUI extends JFrame implements ActionListener {
         iDownloadBtn.addActionListener(this);
     }
 
+
     public void actionPerformed(ActionEvent pEvent) {
         if (pEvent.getSource() == iRefreshBtn) {
             if (iHandler == null) {
@@ -71,6 +82,7 @@ public class ClientUI extends JFrame implements ActionListener {
 
             iDownFileTbx.setText("");
             iDownFileTbx.setEditable(true);
+            iDownloadBtn.setEnabled(true);
         }
 
         if (pEvent.getSource() == iDownloadBtn) {
@@ -129,6 +141,7 @@ public class ClientUI extends JFrame implements ActionListener {
     public ClientUI(String pTitle) {
         super(pTitle);
         iDownFileTbx.setEditable(false);
+        iDownloadBtn.setEnabled(false);
         setContentPane(iMainPnl);
         setupiFilesTbl();
         setupiDownloadTbl();

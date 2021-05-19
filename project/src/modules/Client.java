@@ -64,12 +64,16 @@ class ClientController implements Runnable {
                 File received_file = new File("./downloads/" + Utils.getCurrentTimestamp() + file_info.getiFileDetails().getiName());
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(received_file));
 
-                System.out.println("Num partition: " + file_info.getiNoPartitions());
+
+                // tải file từ đây
+                int id = iUI.getRowCountDownloadTbl();
+                iUI.addNewRowToDownloadTbl(file_info.getiFileDetails());
+                // System.out.println("Num partition: " + file_info.getiNoPartitions());
                 for (int i = 0; i < (file_info.getiNoPartitions() - 1); ++i) {
                     iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
                     iSocket.receive(iInPacket);
                     bos.write(iBuffer, 0, FileServerController.PIECE);
-                    System.out.println("done a partition: " + (i + 1));
+                    // System.out.println("done a partition: " + (i + 1));
                 }
 
                 // viết cái byte cuối cùng
@@ -79,7 +83,8 @@ class ClientController implements Runnable {
                 bos.flush();
                 bos.close();
                 iSocket.close();
-                System.out.println(">> Download done");
+                iUI.updateDoneStatusDownloadTbl(id);
+                // System.out.println(">> Download done");
             }
 
         } catch (IOException | ClassNotFoundException err) {
