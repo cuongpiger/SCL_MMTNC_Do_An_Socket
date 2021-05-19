@@ -20,6 +20,10 @@ public class FileInfo implements Serializable {
         iHashCode = pHashCode;
     }
 
+    public FileDetails getiFileDetails() {
+        return iFileDetails;
+    }
+
     public static String genSha256(File pFile) {
         try {
             MessageDigest sha_digest = MessageDigest.getInstance("SHA-256");

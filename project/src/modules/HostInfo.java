@@ -14,6 +14,11 @@ public class HostInfo implements Serializable {
         iPort = -1;
     }
 
+    public HostInfo(String pAddress, int pPort) {
+        iAddress = pAddress;
+        iPort = pPort;
+    }
+
     public void setiAddress(String pAddress) {
         iAddress = pAddress;
     }

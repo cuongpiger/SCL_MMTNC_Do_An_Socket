@@ -57,6 +57,7 @@ public class ClientUI extends JFrame implements ActionListener {
 
     private void setupActionListerners() {
         iRefreshBtn.addActionListener(this);
+        iDownloadBtn.addActionListener(this);
     }
 
     public void actionPerformed(ActionEvent pEvent) {
@@ -66,6 +67,34 @@ public class ClientUI extends JFrame implements ActionListener {
                 iHandler.startClient("REFRESH");
             } else {
                 iHandler.startClient("REFRESH");
+            }
+
+            iDownFileTbx.setText("");
+            iDownFileTbx.setEditable(true);
+        }
+
+        if (pEvent.getSource() == iDownloadBtn) {
+            try {
+                int id_file = Integer.parseInt(iDownFileTbx.getText());
+                int no_rows = iFilesTbl.getRowCount();
+
+                if (id_file > 0 && id_file <= no_rows) {
+                    id_file -= 1;
+                    String filename = iFilesTbl.getValueAt(id_file,1).toString();
+                    String[] file_server = iFilesTbl.getValueAt(id_file,3).toString().split(":");
+
+                    if (iHandler != null && iHandler.canDownload()) {
+                        HostInfo host = new HostInfo(file_server[0], Integer.parseInt(file_server[1]));
+                        ClientController downloader = new ClientController(host, filename, this);
+                        downloader.startThread();
+                    }
+                } else {
+                    showDialog("Your file's ID does not exist!");
+                    iDownFileTbx.setText("");
+                }
+            } catch (NumberFormatException err) {
+                iDownFileTbx.setText("");
+                showDialog("Your file's ID is not valid!");
             }
         }
     }
@@ -99,6 +128,7 @@ public class ClientUI extends JFrame implements ActionListener {
 
     public ClientUI(String pTitle) {
         super(pTitle);
+        iDownFileTbx.setEditable(false);
         setContentPane(iMainPnl);
         setupiFilesTbl();
         setupiDownloadTbl();
