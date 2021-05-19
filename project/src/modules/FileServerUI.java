@@ -71,8 +71,11 @@ public class FileServerUI extends JFrame implements ActionListener {
 
 
             if (iStartBtn.getText().equals("START")) { // khởi động FILE-SERVER sẵn sàng cho CLIENT download files
-                // run server
-                iStartBtn.setText("STOP");
+                if (iHandler != null) {
+                    iHandler.start("START-FILE-SERVER");
+                }
+
+                iStartBtn.setText("CLOSE");
                 iStartBtn.setBackground(Color.RED);
 
                 return;

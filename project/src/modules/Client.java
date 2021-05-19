@@ -7,6 +7,13 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+class ClientController implements Runnable {
+
+    public void run() {
+
+    }
+}
+
 public class Client implements Runnable {
     public static final String LABEL = "CLIENT";
     private static HostInfo iMaster = null;
