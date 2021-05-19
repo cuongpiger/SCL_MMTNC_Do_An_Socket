@@ -11,7 +11,8 @@ import java.util.ArrayList;
 
 public class MasterServerUI extends JFrame implements ActionListener {
     private JPanel iMainPnl;
-    private DefaultTableModel iFilesEditor = null;
+    private static DefaultTableModel iFilesEditor = null;
+    private static DefaultTableModel iActEditor = null;
     private JTable iFilesTbl;
     private JTable iActivitiesTbl;
     private JButton iStartBtn;
@@ -35,6 +36,28 @@ public class MasterServerUI extends JFrame implements ActionListener {
         iFilesTbl.setModel(iFilesEditor);
     }
 
+    private void setupiActivitiesTbl() {
+        iActivitiesTbl.setModel(new DefaultTableModel(null, new String[]{"#ID", "Service's name", "IP-Address", "Action"}));
+        iActEditor = (DefaultTableModel) iActivitiesTbl.getModel();
+        TableColumnModel columns = iActivitiesTbl.getColumnModel();
+        DefaultTableCellRenderer render_col = new DefaultTableCellRenderer();
+        render_col.setHorizontalAlignment(JLabel.RIGHT);
+        columns.getColumn(0).setMinWidth(20);
+        columns.getColumn(0).setMaxWidth(40);
+        columns.getColumn(1).setMinWidth(100);
+        columns.getColumn(1).setMaxWidth(200);
+        columns.getColumn(3).setMinWidth(300);
+        columns.getColumn(3).setMaxWidth(400);
+        columns.getColumn(2).setCellRenderer(render_col);
+        iActivitiesTbl.setModel(iActEditor);
+    }
+
+    public void addNewRowToActivitiesTbl(HostInfo pHost, String pService, String pText) {
+        int no_rows = iActivitiesTbl.getRowCount();
+        String addr = pHost != null ? String.format("/%s:%d", pHost.getiAddress(), pHost.getiPort()) : "";
+        iActEditor.addRow(new Object[]{no_rows + 1, pService, addr, pText});
+    }
+
     private void setupActionListeners() {
         iStartBtn.addActionListener(this);
     }
@@ -54,11 +77,11 @@ public class MasterServerUI extends JFrame implements ActionListener {
             HostInfo host = resource.getiFileServer();
             ArrayList<FileDetails> files = resource.getiFiles();
             String address = String.format("%s:%d", host.getiAddress(), host
-            .getiPort());
+                    .getiPort());
 
             for (int i = 0; i < files.size(); ++i) {
                 var file = files.get(i);
-                iFilesEditor.addRow(new Object[] {
+                iFilesEditor.addRow(new Object[]{
                         Integer.toString(i + 1),
                         file.getiName(),
                         String.format("%d bytes", file.getiSize()),
@@ -82,6 +105,7 @@ public class MasterServerUI extends JFrame implements ActionListener {
                     iHandler.startThread();
                 }
 
+                addNewRowToActivitiesTbl(null, MasterServer.LABEL, "start MASTER-SERVER");
                 iStartBtn.setText("CLOSE");
                 iStartBtn.setBackground(Color.RED);
             } else if (iStartBtn.getText().equals("CLOSE")) {
@@ -94,7 +118,7 @@ public class MasterServerUI extends JFrame implements ActionListener {
         super(pTitle);
         setContentPane(iMainPnl);
         setupiFilesTbl();
+        setupiActivitiesTbl();
         setupActionListeners();
-
     }
 }

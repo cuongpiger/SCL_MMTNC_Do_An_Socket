@@ -7,11 +7,14 @@ import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/*
+* Chứa thông tin về file trc khi nó dc gửi cho Client
+* */
 public class FileInfo implements Serializable {
     private FileDetails iFileDetails;
-    private int iNoPartitions;
-    private int iLastByte;
-    private String iHashCode;
+    private int iNoPartitions; // số lượng partition của file dc chia ra
+    private int iLastByte; // giá trị của byte cuôi cùng
+    private String iHashCode; // hashcode sử dụng sha-256 để checksum
 
     public FileInfo(FileDetails pFileDetails, int pNoPartitions, int pLastByte, String pHashCode) {
         iFileDetails = pFileDetails;

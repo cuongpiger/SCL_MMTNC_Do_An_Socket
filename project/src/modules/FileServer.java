@@ -59,6 +59,9 @@ class FileServerController implements Runnable {
     }
 }
 
+/*
+ * Xử lí tương ứng cho một ClientController
+ * */
 class FileServerShipper implements Runnable {
     private DatagramPacket iInPacket = null;
     private DatagramPacket iOutPacket = null;
@@ -113,7 +116,7 @@ class FileServerShipper implements Runnable {
                     // gửi file đi
                     iBuffer = new byte[FileServerController.PIECE];
                     iUI.addNewRowToActivitiesTbl(iInPacket, file_details.getiName(), bale.getiNoPartitions());
-                    int id = iUI.getRowCountActivitiesTbl();
+                    int id = iUI.getRowCountActivitiesTbl() - 1;
                     for (int i = 0; i < (bale.getiNoPartitions() - 1); ++i) {
                         bis.read(iBuffer, 0, FileServerController.PIECE);
                         iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
@@ -154,6 +157,7 @@ class FileServerShipper implements Runnable {
         iThread.start();
     }
 
+    // trả về FileDetails dựa vào filename
     private FileDetails getFileDetails(String pFile) {
         for (var file : iFiles) {
             if (file.getiName().equals(pFile)) {
@@ -209,11 +213,11 @@ class FileServerCloser implements Runnable {
 
 public class FileServer implements Runnable {
     public static final String LABEL = "FILE-SERVER";
-    private static HostInfo iLocal;
-    private static HostInfo iMaster;
-    private static ArrayList<FileDetails> iFiles = null;
+    private static HostInfo iLocal; // HostInfo của File Server
+    private static HostInfo iMaster; // HostInfo của máy Master
+    private static ArrayList<FileDetails> iFiles = null; // chứa danh sách các file mà File Server này đang giữ
     private static Thread iThread = null;
-    private static FileServerUI iUI = null;
+    private static FileServerUI iUI = null; // tham chiếu đến giao diện
 
     public FileServer(FileServerUI pUI) {
         if (iThread == null) {

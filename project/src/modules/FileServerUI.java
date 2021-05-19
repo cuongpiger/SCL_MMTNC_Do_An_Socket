@@ -48,7 +48,7 @@ public class FileServerUI extends JFrame implements ActionListener {
         columns.getColumn(0).setMaxWidth(40);
         columns.getColumn(1).setMinWidth(150);
         columns.getColumn(1).setMaxWidth(150);
-        columns.getColumn(3).setMinWidth(100);
+        columns.getColumn(3).setMinWidth(150);
         columns.getColumn(3).setMaxWidth(200);
         columns.getColumn(1).setCellRenderer(render_col);
         iActivitiesTbl.setModel(iActEditor);
@@ -56,7 +56,7 @@ public class FileServerUI extends JFrame implements ActionListener {
 
     public void addNewRowToActivitiesTbl(DatagramPacket pClient, String pFilename, int pPartitions) {
         int no_rows = iActivitiesTbl.getRowCount();
-        iActEditor.addRow(new Object[]{no_rows, String.format("%s:%d", pClient.getAddress().toString(), pClient.getPort()), pFilename, ""});
+        iActEditor.addRow(new Object[]{no_rows + 1, String.format("%s:%d", pClient.getAddress().toString(), pClient.getPort()), pFilename, ""});
     }
 
     public int getRowCountActivitiesTbl() {
@@ -64,7 +64,7 @@ public class FileServerUI extends JFrame implements ActionListener {
     }
 
     public void updateStateActivitiesTbl(int id, String pText) {
-        iActivitiesTbl.setValueAt(pText, id, 2);
+        iActivitiesTbl.setValueAt(pText, id, 3);
     }
 
     private void updateiFilesTbl(ArrayList<FileDetails> pFiles) {

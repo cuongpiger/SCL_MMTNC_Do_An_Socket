@@ -56,12 +56,13 @@ class MasterServerController implements Runnable {
         }
         iResources.add(container); // thêm container mới vào
         iUI.updateiFilesTbl(iResources);
+        iUI.addNewRowToActivitiesTbl(container.getiFileServer(), FileServer.LABEL, "get list of files");
     }
 
     private void handleClient(Package pBox) {
         try {
             ObjectOutputStream shipper = new ObjectOutputStream(iSocket.getOutputStream());
-            Package pkg = new Package(MasterServer.LABEL, "New file-server is connecting", iResources);
+            Package pkg = new Package(MasterServer.LABEL, "", iResources);
             shipper.writeObject(pkg);
             shipper.close();
         } catch (IOException err) {
@@ -88,10 +89,12 @@ class MasterServerController implements Runnable {
                         }
                     }
 
+                    iUI.addNewRowToActivitiesTbl(file_server_host, FileServer.LABEL, "close FILE-SERVER");
                     iUI.updateiFilesTbl(iResources);
                 }
             } else if (box.getiService().equals(Client.LABEL)) {
                 handleClient(box);
+                iUI.addNewRowToActivitiesTbl(null, Client.LABEL, "send list of files");
             }
 
             iSocket.close();
@@ -113,7 +116,6 @@ public class MasterServer implements Runnable {
     private static HostInfo iLocal;
     private static ServerSocket iMaster = null;
     private static Thread iThread;
-    private static ArrayList<Activity> iActivities;
     private static ArrayList<FileContainer> iResources;
     private static MasterServerUI iUI = null;
 

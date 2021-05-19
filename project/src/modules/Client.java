@@ -4,17 +4,19 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
+/*
+ * Xử lí một file duy nhất mà Client cần download
+ * */
 class ClientController implements Runnable {
-    private static HostInfo iFileServerHost = null;
+    private static HostInfo iFileServerHost = null; // HostInfo của File Server lưu file cần tải
     private Thread iThread = null;
-    private String iFilename = null;
+    private String iFilename = null; // tên file cần tải
     private DatagramSocket iSocket = null;
-    private InetAddress iFileServer = null;
-    private DatagramPacket iInPacket = null;
-    private DatagramPacket iOutPacket = null;
-    private byte[] iBuffer = null;
-    private static ClientUI iUI = null;
-
+    private InetAddress iFileServer = null; // object tham chiếu đến File Server
+    private DatagramPacket iInPacket = null; // gói tin vào
+    private DatagramPacket iOutPacket = null; // gói tin ra
+    private byte[] iBuffer = null; // buffer đóng gói dữ liệu khi convert sang byte array
+    private static ClientUI iUI = null; // tham chiếu đến giao diện
 
     public ClientController(HostInfo pFileServerHost, String pFilename, ClientUI pUI) {
         iFileServerHost = pFileServerHost;
@@ -28,6 +30,9 @@ class ClientController implements Runnable {
         }
     }
 
+    /*
+     * Dùng để chuẩn bị các thông tin cần thiết về file mà Client muốn tải
+     * */
     private byte[] prepareOrder() {
         try {
             Package order = new Package(Client.LABEL, "DOWNLOADED-FILE", iFilename);
@@ -36,7 +41,7 @@ class ClientController implements Runnable {
             oo.writeObject(order);
             oo.close();
 
-            byte[] box = baos.toByteArray();
+            byte[] box = baos.toByteArray(); // chuyển sang byte array
             return box;
         } catch (IOException err) {
             return null;
@@ -61,9 +66,9 @@ class ClientController implements Runnable {
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 FileInfo file_info = (FileInfo) ois.readObject();
 
+                // lưu file vào đường dẫn này
                 File received_file = new File("./downloads/" + Utils.getCurrentTimestamp() + file_info.getiFileDetails().getiName());
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(received_file));
-
 
                 // tải file từ đây
                 int id = iUI.getRowCountDownloadTbl();
@@ -84,6 +89,7 @@ class ClientController implements Runnable {
                 bos.close();
                 iSocket.close();
                 iUI.updateDoneStatusDownloadTbl(id);
+                Client.reduceiNoProcess(); // giảm một phiên download cho client
                 // System.out.println(">> Download done");
             }
 
@@ -101,6 +107,7 @@ class ClientController implements Runnable {
         iThread.start();
     }
 }
+
 
 public class Client implements Runnable {
     public static final String LABEL = "CLIENT";
