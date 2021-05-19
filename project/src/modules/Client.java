@@ -60,6 +60,7 @@ class ClientController implements Runnable {
             iBuffer = new byte[FileServerController.PIECE];
             iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
             iSocket.receive(iInPacket);
+            System.out.println(">>>>>");
             ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
             FileInfo file_info = (FileInfo) ois.readObject();
