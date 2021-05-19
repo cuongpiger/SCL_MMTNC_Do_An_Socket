@@ -76,25 +76,29 @@ class ClientController implements Runnable {
     public void run() {
         int current_state = 0;
         connectFileServer();
-        while (iSocket != null) {
+
+        if (iSocket != null) {
             iBuffer = prepareOrder();
+        }
 
-            if (iBuffer != null && iFileServer != null) {
-                try {
-                    iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
-                    iSocket.send(iOutPacket);
+        if (iBuffer != null && iFileServer != null) {
+            try {
+                iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
+                iSocket.send(iOutPacket);
 
-                    byte[] tmpbuffer = new byte[30000];
-                    DatagramPacket tmppacket = new DatagramPacket(tmpbuffer, tmpbuffer.length);
-                    iSocket.receive(tmppacket);
+                byte[] tmpbuffer = new byte[FileServerController.PIECE];
+                DatagramPacket tmppacket = new DatagramPacket(tmpbuffer, tmpbuffer.length);
+                iSocket.receive(tmppacket);
 
-                    System.out.println("send file thành công");
-                    current_state = 1;
-                } catch (IOException err) {
-                    err.printStackTrace();
-                    current_state = 0;
-                }
+                System.out.println("send file thành công");
+                current_state = 1;
+            } catch (IOException err) {
+                err.printStackTrace();
+                current_state = 0;
             }
+        }
+
+
 
 //            if (current_state == 1) { // gửi thông tin file cần tải đến cho file server thành công
 //                FileInfo file_info = receiveFileInfo(); // nhận thông tin file cần tải
@@ -103,7 +107,7 @@ class ClientController implements Runnable {
 //                    System.out.println(">> " + file_info.getiFileDetails().getiName());
 //                }
 //            }
-        }
+
     }
 
     public void startThread() {
