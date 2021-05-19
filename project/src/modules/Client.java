@@ -57,8 +57,10 @@ class ClientController implements Runnable {
 
     private FileInfo receiveFileInfo() {
         try {
-            byte[] buffer = new byte[FileServerController.PIECE];
-            iInPacket = new DatagramPacket(buffer, buffer.length);
+
+            System.out.println("run here");
+            iBuffer = new byte[FileServerController.PIECE];
+            iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
             iSocket.receive(iInPacket);
             ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
