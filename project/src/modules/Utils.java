@@ -5,6 +5,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/*
+ * Lưu các hàm tiện ích
+ * */
 public class Utils {
     public static HostInfo loadHostInfo(String pPath) {
         HostInfo hi = new HostInfo();
