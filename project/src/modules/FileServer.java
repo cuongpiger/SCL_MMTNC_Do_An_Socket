@@ -103,16 +103,8 @@ class FileServerShipper implements Runnable {
                     iBuffer = baos.toByteArray();
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                     iSocket.send(iOutPacket);
-                    System.out.println(iInPacket.getAddress() + ":" + iHost.getiPort());
-
-                    System.out.println("here");
-                    current_state = 1; // đã gửi file info đến client
                 }
             }
-
-//            if (current_state == 1) { // nếu đã gửi file info cho server rồi thì vô đây
-//                return;
-//            }
         } catch (IOException | ClassNotFoundException err) {
 
         }

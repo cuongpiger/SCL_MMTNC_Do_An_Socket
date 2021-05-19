@@ -43,24 +43,6 @@ class ClientController implements Runnable {
         }
     }
 
-    private FileInfo receiveFileInfo() {
-        try {
-            iBuffer = new byte[FileServerController.PIECE];
-            iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
-            iSocket.receive(iInPacket);
-            System.out.println(">>>>>");
-            ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            FileInfo file_info = (FileInfo) ois.readObject();
-
-            System.out.println("run here");
-
-            return file_info;
-        } catch (IOException | ClassNotFoundException err) {
-            return null;
-        }
-    }
-
     public void run() {
         try {
             iSocket = new DatagramSocket();
@@ -74,6 +56,7 @@ class ClientController implements Runnable {
                 iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
                 iSocket.receive(iInPacket); // nhận file info về
 
+                // giải nén và đọc file
                 ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 FileInfo file_info = (FileInfo) ois.readObject();
