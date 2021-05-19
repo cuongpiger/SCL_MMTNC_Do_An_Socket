@@ -2,6 +2,7 @@ package modules;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -28,6 +29,12 @@ public class Utils {
         }
 
         return hi;
+    }
+
+    public static String getCurrentTimestamp() {
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+
+        return ts.toString();
     }
 
     public static FileDetails getFileDetails(File pFile) {

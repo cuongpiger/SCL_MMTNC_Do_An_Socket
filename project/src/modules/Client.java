@@ -56,12 +56,28 @@ class ClientController implements Runnable {
                 iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
                 iSocket.receive(iInPacket); // nhận file info về
 
-                // giải nén và đọc file
+                // giải nén và đọc file, chuẩn file ra đối tượng FileInfo
                 ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 FileInfo file_info = (FileInfo) ois.readObject();
 
-                System.out.println(file_info.getiFileDetails().getiName());
+                File received_file = new File("./downloads/" + Utils.getCurrentTimestamp() + file_info.getiFileDetails().getiName());
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(received_file));
+
+                for (int i = 0; i < (file_info.getiNoPartitions() - 1); ++i) {
+                    iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
+                    iSocket.receive(iInPacket);
+                    bos.write(iBuffer, 0, FileServerController.PIECE);
+                }
+
+                // viết cái byte cuối cùng
+                iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
+                iSocket.receive(iInPacket);
+                bos.write(iBuffer, 0, file_info.getiLastByte());
+                bos.flush();
+                bos.close();
+                iSocket.close();
+                System.out.println(">> Download done");
             }
 
         } catch (IOException | ClassNotFoundException err) {

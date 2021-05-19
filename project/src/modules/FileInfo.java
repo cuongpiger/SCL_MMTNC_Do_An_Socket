@@ -24,6 +24,14 @@ public class FileInfo implements Serializable {
         return iFileDetails;
     }
 
+    public int getiNoPartitions() {
+        return iNoPartitions;
+    }
+
+    public int getiLastByte() {
+        return getiLastByte();
+    }
+
     public static String genSha256(File pFile) {
         try {
             MessageDigest sha_digest = MessageDigest.getInstance("SHA-256");
@@ -34,6 +42,8 @@ public class FileInfo implements Serializable {
             return null;
         }
     }
+
+
 
     private static String getFileChecksum(MessageDigest digest, File file) throws IOException
     {

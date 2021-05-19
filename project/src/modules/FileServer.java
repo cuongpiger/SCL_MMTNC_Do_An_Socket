@@ -103,6 +103,26 @@ class FileServerShipper implements Runnable {
                     iBuffer = baos.toByteArray();
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                     iSocket.send(iOutPacket);
+
+                    // chuẩn bị các đối tượng cần thiết để ghi file
+                    InputStream input_stream = new FileInputStream(file_send);
+                    BufferedInputStream bis = new BufferedInputStream(input_stream);
+
+                    // gửi file đi
+                    iBuffer = new byte[FileServerController.PIECE];
+                    for (int i = 0; i < (bale.getiNoPartitions() - 1); ++i) {
+                        bis.read(iBuffer, 0, FileServerController.PIECE);
+                        iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
+                        iSocket.send(iOutPacket);
+                    }
+
+                    // gửi những byte cuối cùng
+                    bis.read(iBuffer, 0, bale.getiLastByte());
+                    iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
+                    iSocket.send(iOutPacket);
+                    bis.close();
+
+                    System.out.println("Send file done");
                 }
             }
         } catch (IOException | ClassNotFoundException err) {
