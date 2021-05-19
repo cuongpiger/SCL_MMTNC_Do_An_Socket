@@ -74,12 +74,14 @@ class ClientController implements Runnable {
         int current_state = 0;
         connectFileServer();
         while (iSocket != null) {
-            byte[] buffer = prepareOrder();
+            iBuffer = prepareOrder();
 
-            if (buffer != null && iFileServer != null) {
+            if (iBuffer != null && iFileServer != null) {
                 try {
-                    DatagramPacket box = new DatagramPacket(buffer, buffer.length, iFileServer, iFileServerHost.getiPort());
-                    iSocket.send(box);
+                    iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
+                    iSocket.send(iOutPacket);
+                    iOutPacket = null;
+                    iBuffer = null;
                     current_state = 1;
                 } catch (IOException err) {
                     err.printStackTrace();
