@@ -7,6 +7,7 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.DatagramPacket;
 import java.util.ArrayList;
 
 public class FileServerUI extends JFrame implements ActionListener {
@@ -18,9 +19,11 @@ public class FileServerUI extends JFrame implements ActionListener {
     private JButton iConnectBtn;
     private static FileServer iHandler = null;
     private static DefaultTableModel iFilesEditor = null;
+    private static DefaultTableModel iActEditor = null;
+
 
     private void setupiFilesTbl() {
-        iFilesTbl.setModel(new DefaultTableModel(null, new String[] {"#ID", "Filename", "Size"}));
+        iFilesTbl.setModel(new DefaultTableModel(null, new String[]{"#ID", "Filename", "Size"}));
         iFilesEditor = (DefaultTableModel) iFilesTbl.getModel();
         iFilesEditor.fireTableDataChanged();
         TableColumnModel columns = iFilesTbl.getColumnModel();
@@ -34,13 +37,43 @@ public class FileServerUI extends JFrame implements ActionListener {
         iFilesTbl.setModel(iFilesEditor); // coi chừng dòng này
     }
 
+    private void setupiActivitiesTbl() {
+        iActivitiesTbl.setModel(new DefaultTableModel(null, new String[]{"#ID", "Client's address", "Filename", "State"}));
+        iActEditor = (DefaultTableModel) iActivitiesTbl.getModel();
+        iActEditor.fireTableDataChanged();
+        TableColumnModel columns = iActivitiesTbl.getColumnModel();
+        DefaultTableCellRenderer render_col = new DefaultTableCellRenderer();
+        render_col.setHorizontalAlignment(JLabel.RIGHT);
+        columns.getColumn(0).setMinWidth(20);
+        columns.getColumn(0).setMaxWidth(40);
+        columns.getColumn(1).setMinWidth(150);
+        columns.getColumn(1).setMaxWidth(150);
+        columns.getColumn(3).setMinWidth(100);
+        columns.getColumn(3).setMaxWidth(200);
+        columns.getColumn(1).setCellRenderer(render_col);
+        iActivitiesTbl.setModel(iActEditor);
+    }
+
+    public void addNewRowToActivitiesTbl(DatagramPacket pClient, String pFilename, int pPartitions) {
+        int no_rows = iActivitiesTbl.getRowCount();
+        iActEditor.addRow(new Object[]{no_rows, String.format("%s:%d", pClient.getAddress().toString(), pClient.getPort()), pFilename, ""});
+    }
+
+    public int getRowCountActivitiesTbl() {
+        return iActivitiesTbl.getRowCount();
+    }
+
+    public void updateStateActivitiesTbl(int id, String pText) {
+        iActivitiesTbl.setValueAt(pText, id, 2);
+    }
+
     private void updateiFilesTbl(ArrayList<FileDetails> pFiles) {
         if (pFiles != null) {
             iFilesEditor.getDataVector().removeAllElements(); // clear content in iFilesEditor
 
             for (int i = 0; i < pFiles.size(); ++i) {
                 FileDetails file = pFiles.get(i);
-                iFilesEditor.addRow(new Object[] {
+                iFilesEditor.addRow(new Object[]{
                         Integer.toString(i + 1),
                         file.getiName(),
                         String.format("%d bytes", file.getiSize())
@@ -81,8 +114,10 @@ public class FileServerUI extends JFrame implements ActionListener {
                 return;
             }
 
-            if (iStartBtn.getText().equals("STOP")) { // tạm dừng FILE-SERVER
-                // stop server
+            if (iStartBtn.getText().equals("CLOSE")) { // tạm dừng FILE-SERVER
+                iHandler = new FileServer(this);
+                iHandler.start("CLOSE-FILE-SERVER");
+
                 iStartBtn.setText("START");
                 iStartBtn.setBackground(Color.BLUE);
 
@@ -95,13 +130,16 @@ public class FileServerUI extends JFrame implements ActionListener {
             ArrayList<FileDetails> files = iHandler.getiFiles();
             updateiFilesTbl(files); // update iFilesTbl
             iHandler.start("SEND-FILES-TO-MASTER");
+            iStartBtn.setEnabled(true);
         }
     }
 
     public FileServerUI(String pTitle) {
         super(pTitle);
+        iStartBtn.setEnabled(false);
         setContentPane(iMainPnl);
         setupiFilesTbl();
+        setupiActivitiesTbl();
         setupActionListeners();
     }
 }

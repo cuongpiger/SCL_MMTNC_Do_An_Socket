@@ -79,6 +79,16 @@ class MasterServerController implements Runnable {
             if (box.getiService().equals(FileServer.LABEL)) {
                 if (box.getiMessage().equals("CONNECT")) {
                     handleFilesServer(box);
+                } else if (box.getiMessage().equals("CLOSE")) {
+                    HostInfo file_server_host = (HostInfo) box.getiContent();
+                    for (int i = 0; i < iResources.size(); ++i) {
+                        if (iResources.get(i).getiFileServer().getiAddress().equals(file_server_host.getiAddress())) {
+                            iResources.remove(i);
+                            break;
+                        }
+                    }
+
+                    iUI.updateiFilesTbl(iResources);
                 }
             } else if (box.getiService().equals(Client.LABEL)) {
                 handleClient(box);

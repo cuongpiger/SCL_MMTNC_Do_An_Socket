@@ -38,7 +38,6 @@ public class ClientUI extends JFrame implements ActionListener {
     public void addNewRowToDownloadTbl(FileDetails pFile) {
         int no_rows = iDownloadTbl.getRowCount();
         iDownloadEditor.addRow(new Object[] {no_rows, pFile.getiName(), "Downloading", String.format("%d bytes", pFile.getiSize())});
-        iDownloadTbl.setModel(iDownloadEditor);
     }
 
     public int getRowCountDownloadTbl() {

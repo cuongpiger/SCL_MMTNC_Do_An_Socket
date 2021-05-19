@@ -41,7 +41,7 @@ class FileServerController implements Runnable {
             try {
                 iInPacket = new DatagramPacket(buffer, buffer.length);
                 iServer.receive(iInPacket); // code từ khúc này lên trên ổn
-                FileServerShipper shipper = new FileServerShipper(iServer, iInPacket, iFiles, iHost);
+                FileServerShipper shipper = new FileServerShipper(iServer, iInPacket, iFiles, iHost, iUI);
                 shipper.startThread();
             } catch (IOException err) {
                 System.out.print("\uD83D\uDEAB FileServerController.openServer(): ");
@@ -67,12 +67,14 @@ class FileServerShipper implements Runnable {
     private HostInfo iHost = null;
     private byte[] iBuffer = null;
     private DatagramSocket iSocket = null;
+    private static FileServerUI iUI;
 
-    public FileServerShipper(DatagramSocket pSocket, DatagramPacket pInPacket, ArrayList<FileDetails> pFiles, HostInfo pHost) {
+    public FileServerShipper(DatagramSocket pSocket, DatagramPacket pInPacket, ArrayList<FileDetails> pFiles, HostInfo pHost, FileServerUI pUI) {
         iSocket = pSocket;
         iInPacket = pInPacket;
         iFiles = pFiles;
         iHost = pHost;
+        iUI = pUI;
 
         // nguyên cái constructor này ổn
     }
@@ -110,12 +112,17 @@ class FileServerShipper implements Runnable {
 
                     // gửi file đi
                     iBuffer = new byte[FileServerController.PIECE];
+                    iUI.addNewRowToActivitiesTbl(iInPacket, file_details.getiName(), bale.getiNoPartitions());
+                    int id = iUI.getRowCountActivitiesTbl();
                     for (int i = 0; i < (bale.getiNoPartitions() - 1); ++i) {
                         bis.read(iBuffer, 0, FileServerController.PIECE);
                         iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                         iSocket.send(iOutPacket);
                         waitClient(100);
-                        System.out.println(">> sent partition: " + (i + 1));
+
+                        if (i % 10 == 0) {
+                            iUI.updateStateActivitiesTbl(id, String.format("sending %d/%d", i + 1, bale.getiNoPartitions()));
+                        }
                     }
 
                     // gửi những byte cuối cùng
@@ -123,12 +130,14 @@ class FileServerShipper implements Runnable {
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                     iSocket.send(iOutPacket);
                     bis.close();
-
-                    System.out.println("Send file done");
+                    iUI.updateStateActivitiesTbl(id, "Done");
                 }
             }
         } catch (IOException | ClassNotFoundException err) {
+            System.out.print("\uD83D\uDEAB FileServerShipper.run(): ");
+            err.printStackTrace();
 
+            iUI.showDialog("An error occurred while running FILE-SERVER!");
         }
     }
 
@@ -161,6 +170,40 @@ class FileServerShipper implements Runnable {
         int no_parts = (int) (file_length / FileServerController.PIECE) + (last_byte > 0 ? 1 : 0);
 
         return new FileInfo(pFileDetails, no_parts, last_byte, FileInfo.genSha256(pFile));
+    }
+}
+
+class FileServerCloser implements Runnable {
+    private static Thread iThread = null;
+    private static HostInfo iMaster = null;
+    private static HostInfo iLocal = null;
+    private static FileServerUI iUI = null;
+
+    public FileServerCloser(HostInfo pMaster, HostInfo pLocal, FileServerUI pUI) {
+        iMaster = pMaster;
+        iLocal = pLocal;
+        iUI = pUI;
+    }
+
+    public void run() {
+        try {
+            Socket master = new Socket(iMaster.getiAddress(), iMaster.getiPort());
+            ObjectOutputStream shipper = new ObjectOutputStream(master.getOutputStream());
+            Package box = new Package(FileServer.LABEL, "CLOSE", iLocal);
+            shipper.writeObject(box);
+            master.close();
+            System.exit(0);
+        } catch (IOException err) {
+            System.out.print("\uD83D\uDEAB FileServerCloser.run(): ");
+            err.printStackTrace();
+
+            iUI.showDialog("An error occurred while closing FILE-SERVER!");
+        }
+    }
+
+    public void startThread() {
+        iThread = new Thread(this);
+        iThread.start();
     }
 }
 
@@ -236,6 +279,9 @@ public class FileServer implements Runnable {
         } else if (pCommand.equals("START-FILE-SERVER")) {
             FileServerController controller = new FileServerController(iLocal, iUI, iFiles);
             controller.startThread();
+        } else if (pCommand.equals("CLOSE-FILE-SERVER")) {
+            FileServerCloser closer = new FileServerCloser(iMaster, iLocal, iUI);
+            closer.startThread();
         }
     }
 }
