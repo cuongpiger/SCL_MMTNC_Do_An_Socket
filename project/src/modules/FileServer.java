@@ -81,7 +81,7 @@ class FileServerShipper implements Runnable {
             ByteArrayInputStream bais = new ByteArrayInputStream(iOrder.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
             Package pkg = (Package) ois.readObject();
-            System.out.println(">> FileServerShipper 1" + pkg.getiService());
+            System.out.println(">> FileServerShipper 1: " + pkg.getiService());
 
             if (pkg != null && pkg.getiService().equals(Client.LABEL) && pkg.getiMessage().equals("DOWNLOADED-FILE")) {
                 System.out.println("FileServerShipper 2");
@@ -99,7 +99,7 @@ class FileServerShipper implements Runnable {
                     oo.close();
 
                     byte[] send_file = baos.toByteArray();
-                    DatagramPacket send_packet = new DatagramPacket(send_file, send_file.length, iOrder.getAddress(), iHost.getiPort());
+                    DatagramPacket send_packet = new DatagramPacket(send_file, send_file.length, iOrder.getAddress(), iOrder.getPort());
                     System.out.println(iOrder.getAddress());
                     iServer.send(send_packet);
                     current_state = 1; // đã gửi file info đến client

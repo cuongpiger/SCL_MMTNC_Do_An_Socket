@@ -10,7 +10,11 @@ class ClientController implements Runnable {
     private String iFilename = null;
     private DatagramSocket iSocket = null;
     private InetAddress iFileServer = null;
+    private DatagramPacket iInPacket = null;
+    private DatagramPacket iOutPacket = null;
+    private byte[] iBuffer = null;
     private static ClientUI iUI = null;
+
 
     public ClientController(HostInfo pFileServerHost, String pFilename, ClientUI pUI) {
         iFileServerHost = pFileServerHost;
@@ -54,13 +58,13 @@ class ClientController implements Runnable {
     private FileInfo receiveFileInfo() {
         try {
             byte[] buffer = new byte[FileServerController.PIECE];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            iInPacket = new DatagramPacket(buffer, buffer.length);
 
             System.out.println("this here");
-            iSocket.receive(packet);
+            iSocket.receive(iInPacket);
 
             System.out.println(">> inside receiveFileInfo");
-            ByteArrayInputStream bais = new ByteArrayInputStream(packet.getData());
+            ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
             System.out.println("aasdasda");
             FileInfo file_info = (FileInfo) ois.readObject();
@@ -75,11 +79,11 @@ class ClientController implements Runnable {
         int current_state = 0;
         connectFileServer();
         while (iSocket != null) {
-            byte[] content = prepareOrder();
+            iBuffer = prepareOrder();
 
-            if (content != null && iFileServer != null) {
+            if (iBuffer != null && iFileServer != null) {
                 try {
-                    DatagramPacket box = new DatagramPacket(content, content.length, iFileServer, iFileServerHost.getiPort());
+                    DatagramPacket box = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
                     iSocket.send(box);
                     current_state = 1;
                 } catch (IOException err) {
