@@ -108,26 +108,14 @@ class FileServerShipper implements Runnable {
                     InputStream input_stream = new FileInputStream(file_send);
                     BufferedInputStream bis = new BufferedInputStream(input_stream);
 
-                    byte[] signal = new byte[5];
-                    String message = "1";
-
                     // gửi file đi
                     iBuffer = new byte[FileServerController.PIECE];
-                    for (int i = 0; i < (bale.getiNoPartitions() - 1);) {
-                        if (message.equals("1")) {
-                            bis.read(iBuffer, 0, FileServerController.PIECE);
-                            iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
-
-                        }
+                    for (int i = 0; i < (bale.getiNoPartitions() - 1); ++i) {
+                        bis.read(iBuffer, 0, FileServerController.PIECE);
+                        iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                         iSocket.send(iOutPacket);
-                        iInPacket = new DatagramPacket(signal, signal.length);
-                        iSocket.receive(iInPacket);
-                        message = new String(iInPacket.getData(), 0, iInPacket.getLength());
-
-                        if (message.equals("1")) {
-                            i += 1;
-                            System.out.println(">> sent partition: " + (i + 1));
-                        }
+                        waitClient(100);
+                        System.out.println(">> sent partition: " + (i + 1));
                     }
 
                     // gửi những byte cuối cùng
@@ -141,6 +129,14 @@ class FileServerShipper implements Runnable {
             }
         } catch (IOException | ClassNotFoundException err) {
 
+        }
+    }
+
+    private void waitClient(long iMiliseconds) {
+        try {
+            Thread.sleep(iMiliseconds);
+        } catch (InterruptedException err) {
+            return;
         }
     }
 
