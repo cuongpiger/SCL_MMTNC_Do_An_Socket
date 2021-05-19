@@ -59,14 +59,9 @@ class ClientController implements Runnable {
         try {
             byte[] buffer = new byte[FileServerController.PIECE];
             iInPacket = new DatagramPacket(buffer, buffer.length);
-
-            System.out.println("this here");
             iSocket.receive(iInPacket);
-
-            System.out.println(">> inside receiveFileInfo");
             ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
-            System.out.println("aasdasda");
             FileInfo file_info = (FileInfo) ois.readObject();
 
             return file_info;
@@ -93,13 +88,10 @@ class ClientController implements Runnable {
             }
 
             if (current_state == 1) { // gửi thông tin file cần tải đến cho file server thành công
-                System.out.println("CHờ nhận file từ server");
                 FileInfo file_info = receiveFileInfo(); // nhận thông tin file cần tải
-                System.out.print("go here");
 
                 if (file_info != null) {
                     System.out.println(">> " + file_info.getiFileDetails().getiName());
-                    Client.reduceiNoProcess();
                 }
             }
         }
