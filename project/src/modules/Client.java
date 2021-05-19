@@ -102,6 +102,8 @@ class ClientController implements Runnable {
     public void startThread() {
         iThread = new Thread(this);
         iThread.start();
+
+        System.out.print("run startThread");
     }
 }
 
