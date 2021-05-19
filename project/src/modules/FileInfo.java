@@ -29,7 +29,7 @@ public class FileInfo implements Serializable {
     }
 
     public int getiLastByte() {
-        return getiLastByte();
+        return iLastByte;
     }
 
     public static String genSha256(File pFile) {
