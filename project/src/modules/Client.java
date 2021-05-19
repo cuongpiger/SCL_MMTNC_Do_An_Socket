@@ -30,7 +30,7 @@ class ClientController implements Runnable {
 
     private void connectFileServer() {
         try {
-            iSocket = new DatagramSocket();
+            iSocket = new DatagramSocket(4321);
         } catch (SocketException err) {
             System.out.print("\uD83D\uDEAB ClientController.connectFileServer(): ");
             err.printStackTrace();
