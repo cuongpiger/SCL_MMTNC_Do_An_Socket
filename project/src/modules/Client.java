@@ -80,6 +80,7 @@ class ClientController implements Runnable {
                 try {
                     DatagramPacket box = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
                     iSocket.send(box);
+                    iBuffer = null;
                     current_state = 1;
                 } catch (IOException err) {
                     err.printStackTrace();
