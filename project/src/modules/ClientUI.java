@@ -38,6 +38,7 @@ public class ClientUI extends JFrame implements ActionListener {
     public void addNewRowToDownloadTbl(FileDetails pFile) {
         int no_rows = iDownloadTbl.getRowCount();
         iDownloadEditor.addRow(new Object[] {no_rows, pFile.getiName(), "Downloading", String.format("%d bytes", pFile.getiSize())});
+        iDownloadTbl.setModel(iDownloadEditor);
     }
 
     public int getRowCountDownloadTbl() {
@@ -91,6 +92,7 @@ public class ClientUI extends JFrame implements ActionListener {
                 int no_rows = iFilesTbl.getRowCount();
 
                 if (id_file > 0 && id_file <= no_rows) {
+                    iDownFileTbx.setText("");
                     id_file -= 1;
                     String filename = iFilesTbl.getValueAt(id_file,1).toString();
                     String[] file_server = iFilesTbl.getValueAt(id_file,3).toString().split(":");
