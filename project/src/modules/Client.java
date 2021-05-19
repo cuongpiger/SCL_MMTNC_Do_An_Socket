@@ -82,8 +82,8 @@ class ClientController implements Runnable {
                 try {
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
                     iSocket.send(iOutPacket);
-                    iOutPacket = null;
-                    iBuffer = null;
+
+                    System.out.println("send file thành công");
                     current_state = 1;
                 } catch (IOException err) {
                     err.printStackTrace();

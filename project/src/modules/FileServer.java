@@ -41,7 +41,7 @@ class FileServerController implements Runnable {
             try {
                 iInPacket = new DatagramPacket(buffer, buffer.length);
                 iServer.receive(iInPacket); // code từ khúc này lên trên ổn
-                FileServerShipper shipper = new FileServerShipper(iInPacket, iFiles, iHost);
+                FileServerShipper shipper = new FileServerShipper(iServer, iInPacket, iFiles, iHost);
                 shipper.startThread();
             } catch (IOException err) {
                 System.out.print("\uD83D\uDEAB FileServerController.openServer(): ");
@@ -66,9 +66,10 @@ class FileServerShipper implements Runnable {
     private Thread iThread = null;
     private HostInfo iHost = null;
     private byte[] iBuffer = null;
-    private DatagramSocket iServer = null;
+    private DatagramSocket iSocket = null;
 
-    public FileServerShipper(DatagramPacket pInPacket, ArrayList<FileDetails> pFiles, HostInfo pHost) {
+    public FileServerShipper(DatagramSocket pSocket, DatagramPacket pInPacket, ArrayList<FileDetails> pFiles, HostInfo pHost) {
+        iSocket = pSocket;
         iInPacket = pInPacket;
         iFiles = pFiles;
         iHost = pHost;
@@ -80,7 +81,6 @@ class FileServerShipper implements Runnable {
         int current_state = 0;
 
         try {
-            iServer = new DatagramSocket();
             ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
             ObjectInputStream ois = new ObjectInputStream(bais);
             Package pkg = (Package) ois.readObject();
@@ -102,7 +102,7 @@ class FileServerShipper implements Runnable {
 
                     iBuffer = baos.toByteArray();
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iHost.getiPort());
-                    iServer.send(iOutPacket);
+                    iSocket.send(iOutPacket);
                     System.out.println(iInPacket.getAddress());
 
                     System.out.println("here");
