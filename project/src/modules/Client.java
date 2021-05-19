@@ -30,7 +30,7 @@ class ClientController implements Runnable {
 
     private void connectFileServer() {
         try {
-            iSocket = new DatagramSocket(4321);
+            iSocket = new DatagramSocket();
         } catch (SocketException err) {
             System.out.print("\uD83D\uDEAB ClientController.connectFileServer(): ");
             err.printStackTrace();
@@ -84,19 +84,13 @@ class ClientController implements Runnable {
                     iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
                     iSocket.send(iOutPacket);
 
-                    iBuffer = new byte[FileServerController.PIECE];
-                    iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
-                    iSocket.receive(iInPacket);
-                    System.out.println(">>>>>");
-                    ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
-                    ObjectInputStream ois = new ObjectInputStream(bais);
-                    FileInfo file_info = (FileInfo) ois.readObject();
-
-                    System.out.println("run here");
+                    byte[] tmpbuffer = new byte[FileServerController.PIECE];
+                    DatagramPacket tmppacket = new DatagramPacket(tmpbuffer, tmpbuffer.length);
+                    iSocket.receive(tmppacket);
 
                     System.out.println("send file thành công");
                     current_state = 1;
-                } catch (IOException | ClassNotFoundException err) {
+                } catch (IOException err) {
                     err.printStackTrace();
                     current_state = 0;
                 }
