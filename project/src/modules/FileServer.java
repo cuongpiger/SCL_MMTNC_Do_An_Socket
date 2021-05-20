@@ -92,8 +92,17 @@ class FileServerShipper implements Runnable {
             // khúc này lên trên ổn
 
 
-            if (pkg != null && pkg.getiService().equals(Client.LABEL) && pkg.getiMessage().equals("DOWNLOADED-FILE")) {
-                String filename = (String) pkg.getiContent();
+            if (pkg != null && pkg.getiService().equals(Client.LABEL) && (pkg.getiMessage().equals("DOWNLOADED-FILE") || pkg.getiMessage().equals("RESEND-FILE"))) {
+                String filename = null;
+                int pos = -1;
+
+                if (pkg.getiMessage().equals("DOWNLOADED-FILE")) {
+                    filename = (String) pkg.getiContent();
+                } else {
+                    String[] tmp = ((String) pkg.getiContent()).split("`");
+                    filename = tmp[0];
+                    pos = Integer.parseInt(tmp[1]);
+                }
                 FileDetails file_details = getFileDetails(filename); // tìm gói tin
                 File file_send = new File("./resources/" + file_details.getiName());
                 // khúc này lên trên cũng ổn
@@ -118,6 +127,10 @@ class FileServerShipper implements Runnable {
                     iUI.addNewRowToActivitiesTbl(iInPacket, file_details.getiName(), bale.getiNoPartitions());
                     int id = iUI.getRowCountActivitiesTbl() - 1;
                     for (int i = 0; i < (bale.getiNoPartitions() - 1); ++i) {
+                        if (i < pos) {
+                            continue;
+                        }
+
                         bis.read(iBuffer, 0, FileServerController.PIECE);
                         iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                         iSocket.send(iOutPacket);

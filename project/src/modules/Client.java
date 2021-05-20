@@ -76,7 +76,26 @@ class ClientController implements Runnable {
                 // System.out.println("Num partition: " + file_info.getiNoPartitions());
                 for (int i = 0; i < (file_info.getiNoPartitions() - 1); ++i) {
                     iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
-                    iSocket.receive(iInPacket);
+
+                    // nhận file từ đây
+                    while (true) {
+                        try {
+                            iSocket.setSoTimeout(3000); // sau 3 giây ko nhận dc gì thì la làng lên
+                            iSocket.receive(iInPacket);
+
+                            break;
+                        } catch (SocketException | SocketTimeoutException err) {
+                            Package order = new Package(Client.LABEL, "RESEND-FILE", iFilename + "`" + i);
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            ObjectOutput oo = new ObjectOutputStream(baos);
+                            oo.writeObject(order);
+                            oo.close();
+
+                            byte[] box = baos.toByteArray(); // chuyển sang byte array
+                            iSocket.send(new DatagramPacket(box, box.length, iFileServer, iFileServerHost.getiPort()));
+                        }
+                    }
+
                     bos.write(iBuffer, 0, FileServerController.PIECE);
                     // System.out.println("done a partition: " + (i + 1));
 
