@@ -1,9 +1,9 @@
 
 <dev align="center">
 
-  # ĐỒ ÁN MẠNG MÁY TÍNH<BR>LẬP TRÌNH SOCKET
-  
-  _(mã nguồn chính của dự án được lưu trữ tại<br>[https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket](https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket))_
+# ĐỒ ÁN MẠNG MÁY TÍNH<BR>LẬP TRÌNH SOCKET
+
+_(mã nguồn chính của dự án được lưu trữ tại<br>[https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket](https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket))_
 
 </dev>
 
