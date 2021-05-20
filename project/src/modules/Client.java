@@ -127,7 +127,7 @@ class ClientController implements Runnable {
                         iSocket.send(new DatagramPacket(box, box.length, iFileServer, iFileServerHost.getiPort()));
                     }
                 }
-                
+
                 iUI.updateStatusDownloadTbl(id, "Downloaded");
                 Client.reduceiNoProcess(); // giảm một phiên download cho client
                 // System.out.println(">> Download done");

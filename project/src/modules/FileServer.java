@@ -137,7 +137,7 @@ class FileServerShipper implements Runnable {
                         waitClient(200);
 
                         if (i % 10 == 0) {
-                            iUI.updateStateActivitiesTbl(id, String.format("sending %d/%d", i + 1, bale.getiNoPartitions()));
+                            iUI.updateStateActivitiesTbl(id, String.format("sending %d/%d partitions", i + 1, bale.getiNoPartitions()));
                         }
                     }
 
