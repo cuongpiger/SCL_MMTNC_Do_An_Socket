@@ -137,12 +137,8 @@ class ClientController implements Runnable {
                     Client.reduceiNoProcess(); // giảm một phiên download cho client
                     // System.out.println(">> Download done");
                 }
-
-                // checksum ngay đây
-                if (FileInfo.genSha256(received_file).equals(file_info.getiHashCode())) {
-                    iSocket.close();
-                    break;
-                }
+                iSocket.close();
+                break;
             } catch (IOException | ClassNotFoundException err) {
                 System.out.print("\uD83D\uDEAB ClientController.run(): ");
                 err.printStackTrace();
