@@ -49,43 +49,81 @@ class ClientController implements Runnable {
     }
 
     public void run() {
-        try {
-            iSocket = new DatagramSocket();
-            iBuffer = prepareOrder(); // chuẩn bị các thông tin về file cần tải
+        while (true) {
+            try {
+                if (iSocket == null) iSocket = new DatagramSocket();
 
-            if (iBuffer != null && iFileServer != null) {
-                iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
-                iSocket.send(iOutPacket); // gửi đi
+                iBuffer = prepareOrder(); // chuẩn bị các thông tin về file cần tải
+                File received_file = null;
+                FileInfo file_info = null;
+                String file_name = null;
 
-                iBuffer = new byte[FileServerController.PIECE];
-                iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
-                iSocket.receive(iInPacket); // nhận file info về
+                if (iBuffer != null && iFileServer != null) {
+                    iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iFileServer, iFileServerHost.getiPort());
+                    iSocket.send(iOutPacket); // gửi đi
 
-                // giải nén và đọc file, chuẩn file ra đối tượng FileInfo
-                ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
-                ObjectInputStream ois = new ObjectInputStream(bais);
-                FileInfo file_info = (FileInfo) ois.readObject();
-
-                // lưu file vào đường dẫn này
-                File received_file = new File("./downloads/" + Utils.getCurrentTimestamp() + file_info.getiFileDetails().getiName());
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(received_file));
-
-                // tải file từ đây
-                int id = iUI.getRowCountDownloadTbl();
-                iUI.addNewRowToDownloadTbl(file_info.getiFileDetails());
-                // System.out.println("Num partition: " + file_info.getiNoPartitions());
-                for (int i = 0; i < (file_info.getiNoPartitions() - 1); ++i) {
+                    iBuffer = new byte[FileServerController.PIECE];
                     iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
+                    iSocket.receive(iInPacket); // nhận file info về
 
-                    // nhận file từ đây
+                    // giải nén và đọc file, chuẩn file ra đối tượng FileInfo
+                    ByteArrayInputStream bais = new ByteArrayInputStream(iInPacket.getData());
+                    ObjectInputStream ois = new ObjectInputStream(bais);
+                    file_info = (FileInfo) ois.readObject();
+
+                    // lưu file vào đường dẫn này
+                    file_name = "./downloads/" + Utils.getCurrentTimestamp() + file_info.getiFileDetails().getiName();
+                    received_file = new File(file_name);
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(received_file));
+
+                    // tải file từ đây
+                    int id = iUI.getRowCountDownloadTbl();
+                    iUI.addNewRowToDownloadTbl(file_info.getiFileDetails());
+                    // System.out.println("Num partition: " + file_info.getiNoPartitions());
+                    for (int i = 0; i < (file_info.getiNoPartitions() - 1); ++i) {
+                        iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
+
+                        // nhận file từ đây
+                        while (true) {
+                            try {
+                                iSocket.setSoTimeout(3000); // sau 3 giây ko nhận dc gì thì la làng lên
+                                iSocket.receive(iInPacket);
+
+                                break;
+                            } catch (SocketException | SocketTimeoutException err) {
+                                Package order = new Package(Client.LABEL, "RESEND-FILE", iFilename + "`" + i);
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                ObjectOutput oo = new ObjectOutputStream(baos);
+                                oo.writeObject(order);
+                                oo.close();
+
+                                byte[] box = baos.toByteArray(); // chuyển sang byte array
+                                iSocket.send(new DatagramPacket(box, box.length, iFileServer, iFileServerHost.getiPort()));
+                            }
+                        }
+
+                        bos.write(iBuffer, 0, FileServerController.PIECE);
+                        // System.out.println("done a partition: " + (i + 1));
+
+                        if (i % 10 == 0) {
+                            String tmp = String.format("getting %d/%d partitions", i, file_info.getiNoPartitions());
+                            iUI.updateStatusDownloadTbl(id, tmp);
+                        }
+                    }
+
+                    // viết cái byte cuối cùng
+                    iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
                     while (true) {
                         try {
                             iSocket.setSoTimeout(3000); // sau 3 giây ko nhận dc gì thì la làng lên
                             iSocket.receive(iInPacket);
-
+                            bos.write(iBuffer, 0, file_info.getiLastByte());
+                            bos.flush();
+                            bos.close();
+                            iSocket.close();
                             break;
                         } catch (SocketException | SocketTimeoutException err) {
-                            Package order = new Package(Client.LABEL, "RESEND-FILE", iFilename + "`" + i);
+                            Package order = new Package(Client.LABEL, "RESEND-FILE", iFilename + "`" + (file_info.getiNoPartitions() - 1));
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
                             ObjectOutput oo = new ObjectOutputStream(baos);
                             oo.writeObject(order);
@@ -96,49 +134,22 @@ class ClientController implements Runnable {
                         }
                     }
 
-                    bos.write(iBuffer, 0, FileServerController.PIECE);
-                    // System.out.println("done a partition: " + (i + 1));
-
-                    if (i % 10 == 0) {
-                        String tmp = String.format("getting %d/%d partitions", i, file_info.getiNoPartitions());
-                        iUI.updateStatusDownloadTbl(id, tmp);
-                    }
+                    iUI.updateStatusDownloadTbl(id, "Downloaded");
+                    Client.reduceiNoProcess(); // giảm một phiên download cho client
+                    // System.out.println(">> Download done");
                 }
 
-                // viết cái byte cuối cùng
-                iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
-                while (true) {
-                    try {
-                        iSocket.setSoTimeout(3000); // sau 3 giây ko nhận dc gì thì la làng lên
-                        iSocket.receive(iInPacket);
-                        bos.write(iBuffer, 0, file_info.getiLastByte());
-                        bos.flush();
-                        bos.close();
-                        iSocket.close();
-                        break;
-                    } catch (SocketException | SocketTimeoutException err) {
-                        Package order = new Package(Client.LABEL, "RESEND-FILE", iFilename + "`" + (file_info.getiNoPartitions() - 1));
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        ObjectOutput oo = new ObjectOutputStream(baos);
-                        oo.writeObject(order);
-                        oo.close();
-
-                        byte[] box = baos.toByteArray(); // chuyển sang byte array
-                        iSocket.send(new DatagramPacket(box, box.length, iFileServer, iFileServerHost.getiPort()));
-                    }
+                // checksum ngay đây
+                if (FileInfo.genSha256(received_file).equals(file_info.getiHashCode())) {
+                    break;
                 }
+            } catch (IOException | ClassNotFoundException err) {
+                System.out.print("\uD83D\uDEAB ClientController.run(): ");
+                err.printStackTrace();
 
-                iUI.updateStatusDownloadTbl(id, "Downloaded");
-                Client.reduceiNoProcess(); // giảm một phiên download cho client
-                // System.out.println(">> Download done");
+                iUI.showDialog("An error occurred while getting the resource from MASTER-SERVER!");
+                iSocket = null;
             }
-
-        } catch (IOException | ClassNotFoundException err) {
-            System.out.print("\uD83D\uDEAB ClientController.run(): ");
-            err.printStackTrace();
-
-            iUI.showDialog("An error occurred while getting the resource from MASTER-SERVER!");
-            iSocket = null;
         }
     }
 

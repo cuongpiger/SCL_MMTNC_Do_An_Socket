@@ -35,6 +35,10 @@ public class FileInfo implements Serializable {
         return iLastByte;
     }
 
+    public String getiHashCode() {
+        return iHashCode;
+    }
+
     public static String genSha256(File pFile) {
         try {
             MessageDigest sha_digest = MessageDigest.getInstance("SHA-256");
