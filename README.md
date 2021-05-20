@@ -1,11 +1,10 @@
 
-<dev align="center">
+<div align="center">
 
 # ĐỒ ÁN MẠNG MÁY TÍNH<BR>LẬP TRÌNH SOCKET
-
 _(mã nguồn chính của dự án được lưu trữ tại<br>[https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket](https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket))_
 
-</dev>
+</div>
 
 ## 1. Đề bài
 *  [Xem tại đây](DeBaiDASocket.pdf)
