@@ -107,11 +107,27 @@ class ClientController implements Runnable {
 
                 // viết cái byte cuối cùng
                 iInPacket = new DatagramPacket(iBuffer, iBuffer.length);
-                iSocket.receive(iInPacket);
-                bos.write(iBuffer, 0, file_info.getiLastByte());
-                bos.flush();
-                bos.close();
-                iSocket.close();
+                while (true) {
+                    try {
+                        iSocket.setSoTimeout(3000); // sau 3 giây ko nhận dc gì thì la làng lên
+                        iSocket.receive(iInPacket);
+                        bos.write(iBuffer, 0, file_info.getiLastByte());
+                        bos.flush();
+                        bos.close();
+                        iSocket.close();
+                        break;
+                    } catch (SocketException | SocketTimeoutException err) {
+                        Package order = new Package(Client.LABEL, "RESEND-FILE", iFilename + "`" + (file_info.getiNoPartitions() - 1));
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        ObjectOutput oo = new ObjectOutputStream(baos);
+                        oo.writeObject(order);
+                        oo.close();
+
+                        byte[] box = baos.toByteArray(); // chuyển sang byte array
+                        iSocket.send(new DatagramPacket(box, box.length, iFileServer, iFileServerHost.getiPort()));
+                    }
+                }
+                
                 iUI.updateStatusDownloadTbl(id, "Downloaded");
                 Client.reduceiNoProcess(); // giảm một phiên download cho client
                 // System.out.println(">> Download done");
