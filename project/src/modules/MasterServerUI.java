@@ -73,6 +73,7 @@ public class MasterServerUI extends JFrame implements ActionListener {
     public void updateiFilesTbl(ArrayList<FileContainer> pResources) {
         iFilesEditor.getDataVector().removeAllElements(); // clear content in iFilesEditor
 
+        int id = 1;
         for (FileContainer resource : pResources) {
             HostInfo host = resource.getiFileServer();
             ArrayList<FileDetails> files = resource.getiFiles();
@@ -82,7 +83,7 @@ public class MasterServerUI extends JFrame implements ActionListener {
             for (int i = 0; i < files.size(); ++i) {
                 var file = files.get(i);
                 iFilesEditor.addRow(new Object[]{
-                        Integer.toString(i + 1),
+                        Integer.toString(id++),
                         file.getiName(),
                         String.format("%d bytes", file.getiSize()),
                         address
