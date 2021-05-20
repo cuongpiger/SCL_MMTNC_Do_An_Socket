@@ -120,7 +120,6 @@ class ClientController implements Runnable {
                             bos.write(iBuffer, 0, file_info.getiLastByte());
                             bos.flush();
                             bos.close();
-                            iSocket.close();
                             break;
                         } catch (SocketException | SocketTimeoutException err) {
                             Package order = new Package(Client.LABEL, "RESEND-FILE", iFilename + "`" + (file_info.getiNoPartitions() - 1));
@@ -141,6 +140,7 @@ class ClientController implements Runnable {
 
                 // checksum ngay đây
                 if (FileInfo.genSha256(received_file).equals(file_info.getiHashCode())) {
+                    iSocket.close();
                     break;
                 }
             } catch (IOException | ClassNotFoundException err) {
