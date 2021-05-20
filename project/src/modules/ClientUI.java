@@ -27,8 +27,8 @@ public class ClientUI extends JFrame implements ActionListener {
         render_col.setHorizontalAlignment(JLabel.RIGHT);
         columns.getColumn(0).setMinWidth(20);
         columns.getColumn(0).setMaxWidth(40);
-        columns.getColumn(2).setMinWidth(100);
-        columns.getColumn(2).setMaxWidth(100);
+        columns.getColumn(2).setMinWidth(150);
+        columns.getColumn(2).setMaxWidth(200);
         columns.getColumn(3).setMinWidth(100);
         columns.getColumn(3).setMaxWidth(200);
         columns.getColumn(3).setCellRenderer(render_col);
@@ -37,15 +37,15 @@ public class ClientUI extends JFrame implements ActionListener {
 
     public void addNewRowToDownloadTbl(FileDetails pFile) {
         int no_rows = iDownloadTbl.getRowCount();
-        iDownloadEditor.addRow(new Object[] {no_rows, pFile.getiName(), "Downloading", String.format("%d bytes", pFile.getiSize())});
+        iDownloadEditor.addRow(new Object[] {no_rows + 1, pFile.getiName(), "Downloading", String.format("%d bytes", pFile.getiSize())});
     }
 
     public int getRowCountDownloadTbl() {
         return iDownloadTbl.getRowCount();
     }
 
-    public void updateDoneStatusDownloadTbl(int id) {
-        iDownloadTbl.setValueAt("Downloaded", id, 2);
+    public void updateStatusDownloadTbl(int id, String pText) {
+        iDownloadTbl.setValueAt(pText, id, 2);
     }
 
     private void setupiFilesTbl() {

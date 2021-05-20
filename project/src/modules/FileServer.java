@@ -121,7 +121,7 @@ class FileServerShipper implements Runnable {
                         bis.read(iBuffer, 0, FileServerController.PIECE);
                         iOutPacket = new DatagramPacket(iBuffer, iBuffer.length, iInPacket.getAddress(), iInPacket.getPort());
                         iSocket.send(iOutPacket);
-                        waitClient(100);
+                        waitClient(200);
 
                         if (i % 10 == 0) {
                             iUI.updateStateActivitiesTbl(id, String.format("sending %d/%d", i + 1, bale.getiNoPartitions()));

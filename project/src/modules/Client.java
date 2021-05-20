@@ -79,6 +79,11 @@ class ClientController implements Runnable {
                     iSocket.receive(iInPacket);
                     bos.write(iBuffer, 0, FileServerController.PIECE);
                     // System.out.println("done a partition: " + (i + 1));
+
+                    if (i % 10 == 0) {
+                        String tmp = String.format("getting %d/%d partitions", i, file_info.getiNoPartitions());
+                        iUI.updateStatusDownloadTbl(id, tmp);
+                    }
                 }
 
                 // viết cái byte cuối cùng
@@ -88,7 +93,7 @@ class ClientController implements Runnable {
                 bos.flush();
                 bos.close();
                 iSocket.close();
-                iUI.updateDoneStatusDownloadTbl(id);
+                iUI.updateStatusDownloadTbl(id, "Downloaded");
                 Client.reduceiNoProcess(); // giảm một phiên download cho client
                 // System.out.println(">> Download done");
             }
