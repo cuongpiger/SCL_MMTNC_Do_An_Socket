@@ -2,6 +2,7 @@
 <dev align="center">
 
   # ĐỒ ÁN MẠNG MÁY TÍNH<BR>LẬP TRÌNH SOCKET
+  
   _(mã nguồn chính của dự án được lưu trữ tại<br>[https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket](https://github.com/cuongpiger/SCL_MMTNC_Do_An_Socket))_
 
 </dev>
@@ -13,7 +14,7 @@
 * Ngôn ngữ: Java 11 LTS
 * IDE: khuyến thích IntelliJ
 
-## 4. Tổ chức và cấu hình:
+## 3. Tổ chức và cấu hình:
 * Thư mục chính của dự án là `project`, dưới đây là cây thư mục:
   ![](images/00.png)
 
@@ -32,8 +33,9 @@
     * `src/config/master.txt`: tương tự như `file.txt`, đây là file dùng để cấu hình IPv4 address và PORT cho `MasterServer`:
       ![](images/02.png)
 
-## 5. Chạy chương trình:
-## 6. Tài liệu kham thảo:
+## 4. Chạy chương trình:
+  * Xem tại đây [https://youtu.be/LNnFf8ZPfjY](https://youtu.be/LNnFf8ZPfjY)
+## 5. Tài liệu kham thảo:
 * Sách **[An Introduction to Network Programming with Java](https://www.springer.com/gp/book/9781447152538)**
 * Mã nguồn tham khảo được demo từ chính đầu sách trên: _[https://github.com/cuongpiger/An_Introduction_to_Network_Programming_with_Java](https://github.com/cuongpiger/An_Introduction_to_Network_Programming_with_Java)_
 * Lập trình file transfer qua UDP: _[https://viettuts.vn/lap-trinh-mang-voi-java/udp-transfer-file-example](https://viettuts.vn/lap-trinh-mang-voi-java/udp-transfer-file-example)_
