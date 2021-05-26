@@ -61,7 +61,7 @@ public class ClientApp {
                     iHandler = new Client();
                 }
                 iHandler.startClient("REFRESH");
-                showFiles();
+                // showFiles();
                 System.out.print("\nEnter file's ID: ");
                 int id = input.nextInt();
                 download(id);
