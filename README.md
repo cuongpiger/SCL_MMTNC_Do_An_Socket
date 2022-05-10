@@ -33,6 +33,7 @@ _(mã nguồn chính của dự án được lưu trữ tại<br>[https://github
       ![](images/02.png)
 
 ## 4. Chạy chương trình:
+![](./images/filetransfer.gif)
   * Xem tại đây [https://youtu.be/LNnFf8ZPfjY](https://youtu.be/LNnFf8ZPfjY)
 ## 5. Tài liệu kham thảo:
 * Sách **[An Introduction to Network Programming with Java](https://www.springer.com/gp/book/9781447152538)**
